@@ -35,6 +35,8 @@ def extractFiles():
             tar.extractall("extract/")
             tar.close()
 
+# downloadFiles()
+# extractFiles()
 
 files = []
 objects = os.listdir("extract/")
@@ -104,6 +106,14 @@ def getNo(tag):
 def getData(tag):
     return tag.childNodes[0].data
 
+def getConfidenceAndValue(SectLabel, variant, tag):
+    values = variant.getElementsByTagName(tag)
+    SectLabel[variant][tag] = []
+    for value in values:
+        SectLabel[variant][tag].append({
+            "confidence": getConfidence(value),
+            "value": getData(value)
+        })
 
 papers = []
 
@@ -136,30 +146,45 @@ for file in files:
             SectLabel[variant]["confidence"] = getConfidence(variant)
             SectLabel[variant]["no"] = getNo(variant)
 
-            titles = variant.getElementsByTagName('title')
-            SectLabel[variant]['title'] = []
-            for title in titles:
-                SectLabel[variant]['title'].append({
-                    "confidence": getConfidence(title),
-                    "value": getData(title)
-                })
-
-            authors = variant.getElementsByTagName('author')
-            SectLabel[variant]['author'] = []
-            for author in authors:
-                SectLabel[variant]['author'].append({
-                    "confidence": getConfidence(author),
-                    "value": getData(author)
-                })
+            getConfidenceAndValue(SectLabel, variant, 'title')
+            getConfidenceAndValue(SectLabel, variant, 'author')
+            getConfidenceAndValue(SectLabel, variant, 'affiliation')
+            getConfidenceAndValue(SectLabel, variant, 'address')
+            getConfidenceAndValue(SectLabel, variant, 'email')
 
         elif algorithmName == "ParsHed":
-            # variant = algorithm.getElementsByTagName('variant')[0]
-            # if(variant.hasAttribute("confidence")):
-            #     print variant.getAttribute("confidence")
+            ParsHed = {}
+            variant = algorithm.getElementsByTagName('variant')[0]
+            ParsHed[variant] = {}
+            ParsHed[variant]["confidence"] = getConfidence(variant)
+            ParsHed[variant]["no"] = getNo(variant)
+
+            getConfidenceAndValue(ParsHed, variant, 'title')
+            getConfidenceAndValue(ParsHed, variant, 'author')
+            getConfidenceAndValue(ParsHed, variant, 'abstract')
+            getConfidenceAndValue(ParsHed, variant, 'address')
+            getConfidenceAndValue(ParsHed, variant, 'email')
             pass
 
         elif algorithmName == "ParsCit":
+            ParsCit = {
+                'citations':[]
+            }
             citationList = algorithm.getElementsByTagName('citationList')[0]
+            citations = citationList.getElementsByTagName('citation')
+            for citation in citations:
+                c = {}
+                if citation.hasAttribute('valid'):
+                    c['valid'] = citation.getAttribute('valid')
+                authors = citation.getElementsByTagName('author')
+                c['author'] = []
+                for author in authors:
+                    c['author'].append(author)
+                titles = citation.getElementsByTagName('title')
+                c['title'] = []
+                if titles is not None:
+                    for title in titles:
+                        
 
             pass
         else:

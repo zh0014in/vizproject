@@ -8,6 +8,13 @@ from xml.dom.minidom import parse
 import xml.dom.minidom as minidom
 import json
 import csv
+import sys
+
+if len(sys.argv) == 2:
+    confidenceLimit = sys.argv[1]
+else:
+    confidenceLimit = 0.9
+
 
 def downloadFiles():
     url = "http://acl-arc.comp.nus.edu.sg/archives/acl-arc-160301-parscit/"
@@ -39,7 +46,6 @@ def extractFiles():
 # downloadFiles()
 # extractFiles()
 
-
 files = []
 objects = os.listdir("extract/")
 for c in objects:
@@ -48,56 +54,15 @@ for c in objects:
         xmls = os.listdir("extract/"+c+"/"+conference)
         for xml in xmls:
             files.append("extract/" + c + "/" + conference + "/" + xml)
-            # print xml
-            # tree = ET.parse("extract/"+c+"/"+conference+"/"+xml)
-            # root = tree.getroot()
 
-
-class MovieHandler(sax.ContentHandler):
-    def __init__(self):
-        self.CurrentData = ""
-        self.author = ""
-        self.affiliation = ""
-        self.rating = ""
-        self.stars = ""
-        self.description = ""
-
-    # Call when an element starts
-    def startElement(self, tag, attributes):
-        self.CurrentData = tag
-        if tag == "algorithm":
-            print "*****algorithm*****"
-            # title = attributes["title"]
-            # print "Title:", title
-
-    # Call when an elements ends
-    def endElement(self, tag):
-        if self.CurrentData == "author":
-            print "author:", self.author
-        elif self.CurrentData == "affiliation":
-            print "affiliation:", self.affiliation
-        self.CurrentData = ""
-
-    # Call when a character is read
-    def characters(self, content):
-        if self.CurrentData == "author":
-            self.author = content
-        elif self.CurrentData == "affiliation":
-            self.affiliation = content
-
-
-# create an XMLReader
-# parser = sax.make_parser()
-# # turn off namepsaces
-# parser.setFeature(sax.handler.feature_namespaces, 0)
-
-# # override the default ContextHandler
-# Handler = MovieHandler()
-# parser.setContentHandler(Handler)
 
 def getConfidence(tag):
     if tag.hasAttribute("confidence"):
-        return tag.getAttribute("confidence")
+        return float(tag.getAttribute("confidence"))
+
+def getValid(tag):
+    if tag.hasAttribute("valid"):
+        return tag.getAttribute("valid")
 
 
 def getNo(tag):
@@ -115,10 +80,8 @@ def getConfidenceAndValueAsArray(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag+"s"] = []
     for value in values:
-        SectLabel[tag+"s"].append({
-            "confidence": getConfidence(value),
-            "value": getData(value)
-        })
+        if getConfidence(value) >= confidenceLimit:
+            SectLabel[tag+"s"].append(getData(value))
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -126,18 +89,17 @@ def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     if len(values) > 0:
         if len(values) > 1:
             print tag + " has more than 1 instances"
-        SectLabel[tag]["confidence"] = getConfidence(values[0])
-        SectLabel[tag]["value"] = getData(values[0])        
+        if getConfidence(values[0]) >= confidenceLimit:
+            SectLabel[tag] = getData(values[0])        
 
 def getCitationAsArray(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
     c[tag+"s"] = []
     if titles is not None:
         for title in titles:
-            t = {}
-            t['confidence'] = getConfidence(title)
-            t['value'] = getData(title)
-            c[tag+"s"].append(t)
+            if getConfidence(title) >= confidenceLimit:
+                t = getData(title)
+                c[tag+"s"].append(t)
 
 def getCitationAsDict(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
@@ -145,8 +107,8 @@ def getCitationAsDict(c, citation, tag):
     if len(titles) > 0:
         if len(titles) > 1:
             print tag + " has more than 1 instances"
-        c[tag]['confidence'] = getConfidence(titles[0])
-        c[tag]['value'] = getData(titles[0])
+        if getConfidence(titles[0]) >= confidenceLimit:
+            c[tag] = getData(titles[0])
 
 papers = []
 problemFiles = []
@@ -163,30 +125,30 @@ def processPaper(collection, paper):
         if algorithmName == "SectLabel":
             SectLabel = {}
             variant = algorithm.getElementsByTagName('variant')[0]
-            SectLabel["confidence"] = getConfidence(variant)
-            SectLabel["no"] = getNo(variant)
+            if getConfidence(variant) >= confidenceLimit:
+                SectLabel["no"] = getNo(variant)
 
-            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'title')
-            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'author')
-            getConfidenceAndValueAsArray(SectLabel, variant, 'affiliation')
-            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'address')
-            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'email')
-            paper['SectLabel'] = SectLabel
+                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'title')
+                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'author')
+                getConfidenceAndValueAsArray(SectLabel, variant, 'affiliation')
+                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'address')
+                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'email')
+                paper['SectLabel'] = SectLabel
         elif algorithmName == "ParsHed":
             # info about current paper
             ParsHed = {}
             variant = algorithm.getElementsByTagName('variant')[0]
-            ParsHed["confidence"] = getConfidence(variant)
-            ParsHed["no"] = getNo(variant)
+            if getConfidence(variant) >= confidenceLimit:
+                ParsHed["no"] = getNo(variant)
 
-            getConfidenceAndValueAsArray(ParsHed, variant, 'title')
-            getConfidenceAndValueAsArray(ParsHed, variant, 'author')
-            getConfidenceAndValueAsArray(ParsHed, variant, 'abstract')
-            getConfidenceAndValueAsArray(ParsHed, variant, 'address')
-            getConfidenceAndValueAsArray(ParsHed, variant, 'email')
-            getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
-            getConfidenceAndValueAsDict(ParsHed, variant, 'web')
-            paper['ParsHed'] = ParsHed
+                getConfidenceAndValueAsArray(ParsHed, variant, 'title')
+                getConfidenceAndValueAsArray(ParsHed, variant, 'author')
+                getConfidenceAndValueAsArray(ParsHed, variant, 'abstract')
+                getConfidenceAndValueAsArray(ParsHed, variant, 'address')
+                getConfidenceAndValueAsArray(ParsHed, variant, 'email')
+                getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
+                getConfidenceAndValueAsDict(ParsHed, variant, 'web')
+                paper['ParsHed'] = ParsHed
             pass
 
         elif algorithmName == "ParsCit":
@@ -194,17 +156,17 @@ def processPaper(collection, paper):
             citationList = algorithm.getElementsByTagName('citationList')[0]
             citations = citationList.getElementsByTagName('citation')
             for citation in citations:
-                c = {}
-                if citation.hasAttribute('valid'):
-                    c['valid'] = citation.getAttribute('valid')
-                getCitationAsArray(c, citation, 'author')
-                getCitationAsDict(c, citation, 'title')
-                getCitationAsDict(c, citation, 'booktitle')
-                getCitationAsDict(c, citation, 'location')
-                getCitationAsDict(c, citation, 'marker')
-                getCitationAsDict(c, citation, 'journal')
+                if getValid(citation):
+                    c = {}
 
-                paper['citations'].append(c)
+                    getCitationAsArray(c, citation, 'author')
+                    getCitationAsDict(c, citation, 'title')
+                    getCitationAsDict(c, citation, 'booktitle')
+                    getCitationAsDict(c, citation, 'location')
+                    getCitationAsDict(c, citation, 'marker')
+                    getCitationAsDict(c, citation, 'journal')
+
+                    paper['citations'].append(c)
             pass
         else:
             print 'missed'
@@ -267,7 +229,7 @@ def processProblemFiles():
     process(data)
 
 process(files)
-processProblemFiles()
+# processProblemFiles()
 
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)

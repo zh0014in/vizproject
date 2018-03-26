@@ -6,7 +6,8 @@ import xml.etree.ElementTree as ET
 import xml.sax as sax
 from xml.dom.minidom import parse
 import xml.dom.minidom as minidom
-
+import json
+import csv
 
 def downloadFiles():
     url = "http://acl-arc.comp.nus.edu.sg/archives/acl-arc-160301-parscit/"
@@ -37,6 +38,7 @@ def extractFiles():
 
 # downloadFiles()
 # extractFiles()
+
 
 files = []
 objects = os.listdir("extract/")
@@ -104,33 +106,52 @@ def getNo(tag):
 
 
 def getData(tag):
-    return tag.childNodes[0].data
+    if len(tag.childNodes) > 0:
+        return tag.childNodes[0].data
+    return ''
+    
 
-def getConfidenceAndValue(SectLabel, variant, tag):
+def getConfidenceAndValueAsArray(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
-    SectLabel[variant][tag] = []
+    SectLabel[tag+"s"] = []
     for value in values:
-        SectLabel[variant][tag].append({
+        SectLabel[tag+"s"].append({
             "confidence": getConfidence(value),
             "value": getData(value)
         })
 
+def getConfidenceAndValueAsDict(SectLabel, variant, tag):
+    values = variant.getElementsByTagName(tag)
+    SectLabel[tag] = {}
+    if len(values) > 0:
+        if len(values) > 1:
+            print tag + " has more than 1 instances"
+        SectLabel[tag]["confidence"] = getConfidence(values[0])
+        SectLabel[tag]["value"] = getData(values[0])        
+
+def getCitationAsArray(c, citation, tag):
+    titles = citation.getElementsByTagName(tag)
+    c[tag+"s"] = []
+    if titles is not None:
+        for title in titles:
+            t = {}
+            t['confidence'] = getConfidence(title)
+            t['value'] = getData(title)
+            c[tag+"s"].append(t)
+
+def getCitationAsDict(c, citation, tag):
+    titles = citation.getElementsByTagName(tag)
+    c[tag] = {}
+    if len(titles) > 0:
+        if len(titles) > 1:
+            print tag + " has more than 1 instances"
+        c[tag]['confidence'] = getConfidence(titles[0])
+        c[tag]['value'] = getData(titles[0])
+
 papers = []
+problemFiles = []
 
-for file in files:
-    # print file
-    paper = {}
-    # Open XML document using minidom parser
-    try:
-        DOMTree = minidom.parse(file)
-    except Exception as e:
-        # print e
-        print file
-        pass
-    collection = DOMTree.documentElement
-    # if collection.hasAttribute("version"):
-    # print "version : %s" % collection.getAttribute("version")
-
+def processPaper(collection, paper):
     # Get all the algorithms in the collection
     algorithms = collection.getElementsByTagName("algorithm")
 
@@ -142,53 +163,120 @@ for file in files:
         if algorithmName == "SectLabel":
             SectLabel = {}
             variant = algorithm.getElementsByTagName('variant')[0]
-            SectLabel[variant] = {}
-            SectLabel[variant]["confidence"] = getConfidence(variant)
-            SectLabel[variant]["no"] = getNo(variant)
+            SectLabel["confidence"] = getConfidence(variant)
+            SectLabel["no"] = getNo(variant)
 
-            getConfidenceAndValue(SectLabel, variant, 'title')
-            getConfidenceAndValue(SectLabel, variant, 'author')
-            getConfidenceAndValue(SectLabel, variant, 'affiliation')
-            getConfidenceAndValue(SectLabel, variant, 'address')
-            getConfidenceAndValue(SectLabel, variant, 'email')
-
+            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'title')
+            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'author')
+            getConfidenceAndValueAsArray(SectLabel, variant, 'affiliation')
+            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'address')
+            # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'email')
+            paper['SectLabel'] = SectLabel
         elif algorithmName == "ParsHed":
+            # info about current paper
             ParsHed = {}
             variant = algorithm.getElementsByTagName('variant')[0]
-            ParsHed[variant] = {}
-            ParsHed[variant]["confidence"] = getConfidence(variant)
-            ParsHed[variant]["no"] = getNo(variant)
+            ParsHed["confidence"] = getConfidence(variant)
+            ParsHed["no"] = getNo(variant)
 
-            getConfidenceAndValue(ParsHed, variant, 'title')
-            getConfidenceAndValue(ParsHed, variant, 'author')
-            getConfidenceAndValue(ParsHed, variant, 'abstract')
-            getConfidenceAndValue(ParsHed, variant, 'address')
-            getConfidenceAndValue(ParsHed, variant, 'email')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'title')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'author')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'abstract')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'address')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'email')
+            getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
+            getConfidenceAndValueAsDict(ParsHed, variant, 'web')
+            paper['ParsHed'] = ParsHed
             pass
 
         elif algorithmName == "ParsCit":
-            ParsCit = {
-                'citations':[]
-            }
+            paper['citations'] = []
             citationList = algorithm.getElementsByTagName('citationList')[0]
             citations = citationList.getElementsByTagName('citation')
             for citation in citations:
                 c = {}
                 if citation.hasAttribute('valid'):
                     c['valid'] = citation.getAttribute('valid')
-                authors = citation.getElementsByTagName('author')
-                c['author'] = []
-                for author in authors:
-                    c['author'].append(author)
-                titles = citation.getElementsByTagName('title')
-                c['title'] = []
-                if titles is not None:
-                    for title in titles:
-                        
+                getCitationAsArray(c, citation, 'author')
+                getCitationAsDict(c, citation, 'title')
+                getCitationAsDict(c, citation, 'booktitle')
+                getCitationAsDict(c, citation, 'location')
+                getCitationAsDict(c, citation, 'marker')
+                getCitationAsDict(c, citation, 'journal')
 
+                paper['citations'].append(c)
             pass
         else:
             print 'missed'
-    # parser.parse(file)
-    # tree = ET.parse(file)
-    # root = tree.getroot()
+    papers.append(paper)
+
+def process(files):
+    for file in files[0:50]:
+        # print file
+        paper = {}
+        # Open XML document using minidom parser
+        try:
+            DOMTree = minidom.parse(file)
+        except Exception as e:
+            print e
+            print file
+            problemFiles.append(file)
+            pass
+        collection = DOMTree.documentElement
+        
+        conferenceName = file.split("/")[2]
+        year = conferenceName[1:]
+        if int(year) > 18:
+            year = "19"+year
+        else:
+            year = "20"+year
+        paper["conference"] = conferenceName
+        paper["year"] = int(year)
+
+        processPaper(collection, paper)
+
+
+def processProblemFiles():
+    data = json.load(open('problemFiles.json'))
+
+    for file in data:
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            newLines = []
+            for line in lines:
+                if line.startswith("<email") and line.strip().endswith(">"):
+                    # print line
+                    line = line.replace("&", ";")
+                    line = line.replace("<surname>", "surname_replace")
+                    line = line.replace("<firstname>", "firstname_replace")
+                    line = line.replace("<lastname>", "lastname_replace")
+                    line = line.replace("<firstName>", "firstname_replace")
+                    line = line.replace("<lastName>", "lastname_replace")
+                    line = line.replace("<dougb", "dougb")
+                    line = line.replace("<12.45>", "12.45")
+                    line = line.replace("<blackljlaffIroukos>", "blackljlaffIroukos")
+                    line = line.replace("<firstname.lastname>", "firstname.lastname_replace")
+                    line = line.replace("<sanae@kecl.cslab.ntt.co.jp>", "sanae@kecl.cslab.ntt.co.jp")
+                    line = line.replace("<surename>", "surename_replace")
+                    line = line.replace("<markus.kreuzthaler,stefan.schulz>", "markus.kreuzthaler,stefan.schulz")
+                    line = line.replace("<http", "http")
+                    line = line.replace("<vramanarayanan,suendermann-oeft,aivanou,kevanini>", "vramanarayanan,suendermann-oeft,aivanou,kevanini")
+                newLines.append(line)
+        with open(file, 'w') as f:
+            f.writelines(newLines)
+    process(data)
+
+process(files)
+processProblemFiles()
+
+with open('data1.json', 'w') as outfile:
+    json.dump(papers, outfile)
+
+# keys = papers[0].keys()
+# with open('data.csv', 'wb') as output_file:
+#     dict_writer = csv.DictWriter(output_file, keys)
+#     dict_writer.writeheader()
+#     dict_writer.writerows(papers)
+
+# with open('problemFiles.json', 'w') as outfile:
+#     json.dump(problemFiles, outfile)

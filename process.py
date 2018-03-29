@@ -97,9 +97,8 @@ def getCitationAsArray(c, citation, tag):
     c[tag+"s"] = []
     if titles is not None:
         for title in titles:
-            if getConfidence(title) >= confidenceLimit:
-                t = getData(title)
-                c[tag+"s"].append(t)
+            t = getData(title)
+            c[tag+"s"].append(t)
 
 def getCitationAsDict(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
@@ -107,8 +106,7 @@ def getCitationAsDict(c, citation, tag):
     if len(titles) > 0:
         if len(titles) > 1:
             print tag + " has more than 1 instances"
-        if getConfidence(titles[0]) >= confidenceLimit:
-            c[tag] = getData(titles[0])
+        c[tag] = getData(titles[0])
 
 papers = []
 problemFiles = []
@@ -156,7 +154,7 @@ def processPaper(collection, paper):
             citationList = algorithm.getElementsByTagName('citationList')[0]
             citations = citationList.getElementsByTagName('citation')
             for citation in citations:
-                if getValid(citation):
+                if getValid(citation) == 'true':
                     c = {}
 
                     getCitationAsArray(c, citation, 'author')

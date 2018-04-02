@@ -43,7 +43,7 @@ def getData(tag):
     return ''
     
 
-def getConfidenceAndValueAsList(SectLabel, variant, tag):
+def getConfidenceAndValueAsList(SectLabel, variant, tag, paper = ""):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag+"s"] = []
     for value in values:
@@ -51,8 +51,17 @@ def getConfidenceAndValueAsList(SectLabel, variant, tag):
             data = getData(value)
             SectLabel[tag+"s"].append(data)
             if tag == 'author':
-                if data not in authors:
-                    authors.append(data)
+                if data not in [a['name'] for a in authors]:
+                    author = {}
+                    author['name'] = data
+                    author[paper['conference']] = 1
+                    authors.append(author)
+                else:
+                    author = [x for x in authors if x['name'] == data][0]
+                    if(paper['conference'] in author):
+                        author[paper['conference']] += 1
+                    else:
+                        author[paper['conference']] = 1
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -111,7 +120,7 @@ def processPaper(collection, paper):
                 ParsHed["no"] = getNo(variant)
 
                 getConfidenceAndValueAsList(ParsHed, variant, 'title')
-                getConfidenceAndValueAsList(ParsHed, variant, 'author')
+                getConfidenceAndValueAsList(ParsHed, variant, 'author', paper)
                 getConfidenceAndValueAsList(ParsHed, variant, 'abstract')
                 getConfidenceAndValueAsList(ParsHed, variant, 'address')
                 getConfidenceAndValueAsList(ParsHed, variant, 'email')
@@ -142,7 +151,7 @@ def processPaper(collection, paper):
     papers.append(paper)
 
 def process(files):
-    for file in files[0:1000]:
+    for file in files[:]:
         # print file
         paper = {}
         # Open XML document using minidom parser
@@ -203,8 +212,11 @@ process(files)
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
 
+with open('authors.json', 'w') as outfile:
+    json.dump(authors, outfile)
+
 with open('authors.txt', 'w') as outfile:
-    for author in sorted(authors):
+    for author in sorted([a['name'] for a in authors]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
 # keys = papers[0].keys()

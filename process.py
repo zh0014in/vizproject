@@ -12,7 +12,7 @@ if len(sys.argv) == 2:
 else:
     confidenceLimit = 0.9
 
-
+authors = []
 files = []
 objects = os.listdir("extract/")
 for c in objects:
@@ -43,12 +43,16 @@ def getData(tag):
     return ''
     
 
-def getConfidenceAndValueAsArray(SectLabel, variant, tag):
+def getConfidenceAndValueAsList(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag+"s"] = []
     for value in values:
         if getConfidence(value) >= confidenceLimit:
-            SectLabel[tag+"s"].append(getData(value))
+            data = getData(value)
+            SectLabel[tag+"s"].append(data)
+            if tag == 'author':
+                if data not in authors:
+                    authors.append(data)
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -59,7 +63,7 @@ def getConfidenceAndValueAsDict(SectLabel, variant, tag):
         if getConfidence(values[0]) >= confidenceLimit:
             SectLabel[tag] = getData(values[0])        
 
-def getCitationAsArray(c, citation, tag):
+def getCitationAsList(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
     c[tag+"s"] = []
     if titles is not None:
@@ -93,11 +97,11 @@ def processPaper(collection, paper):
             if getConfidence(variant) >= confidenceLimit:
                 SectLabel["no"] = getNo(variant)
 
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'title')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'author')
-                getConfidenceAndValueAsArray(SectLabel, variant, 'affiliation')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'address')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'email')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'title')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'author')
+                getConfidenceAndValueAsList(SectLabel, variant, 'affiliation')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'address')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'email')
                 paper['SectLabel'] = SectLabel
         elif algorithmName == "ParsHed":
             # info about current paper
@@ -106,12 +110,12 @@ def processPaper(collection, paper):
             if getConfidence(variant) >= confidenceLimit:
                 ParsHed["no"] = getNo(variant)
 
-                getConfidenceAndValueAsArray(ParsHed, variant, 'title')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'author')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'abstract')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'address')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'email')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
+                getConfidenceAndValueAsList(ParsHed, variant, 'title')
+                getConfidenceAndValueAsList(ParsHed, variant, 'author')
+                getConfidenceAndValueAsList(ParsHed, variant, 'abstract')
+                getConfidenceAndValueAsList(ParsHed, variant, 'address')
+                getConfidenceAndValueAsList(ParsHed, variant, 'email')
+                getConfidenceAndValueAsList(ParsHed, variant, 'affiliation')
                 getConfidenceAndValueAsDict(ParsHed, variant, 'web')
                 paper['ParsHed'] = ParsHed
             pass
@@ -124,7 +128,7 @@ def processPaper(collection, paper):
                 if getValid(citation) == 'true':
                     c = {}
 
-                    getCitationAsArray(c, citation, 'author')
+                    getCitationAsList(c, citation, 'author')
                     getCitationAsDict(c, citation, 'title')
                     getCitationAsDict(c, citation, 'booktitle')
                     getCitationAsDict(c, citation, 'location')
@@ -138,7 +142,7 @@ def processPaper(collection, paper):
     papers.append(paper)
 
 def process(files):
-    for file in files[0:50]:
+    for file in files[0:1000]:
         # print file
         paper = {}
         # Open XML document using minidom parser
@@ -198,6 +202,10 @@ process(files)
 
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
+
+with open('authors.txt', 'w') as outfile:
+    for author in sorted(authors):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
 
 # keys = papers[0].keys()
 # with open('data.csv', 'wb') as output_file:

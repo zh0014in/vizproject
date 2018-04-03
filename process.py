@@ -6,6 +6,7 @@ import xml.dom.minidom as minidom
 import json
 import csv
 import sys
+import re
 
 if len(sys.argv) == 2:
     confidenceLimit = sys.argv[1]
@@ -51,17 +52,8 @@ def getConfidenceAndValueAsList(SectLabel, variant, tag, paper = ""):
             data = getData(value)
             SectLabel[tag+"s"].append(data)
             if tag == 'author':
-                if data not in [a['name'] for a in authors]:
-                    author = {}
-                    author['name'] = data
-                    author[paper['conference']] = 1
-                    authors.append(author)
-                else:
-                    author = [x for x in authors if x['name'] == data][0]
-                    if(paper['conference'] in author):
-                        author[paper['conference']] += 1
-                    else:
-                        author[paper['conference']] = 1
+                if data not in authors:
+                    authors.append(data)
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -209,14 +201,39 @@ def processProblemFiles():
 process(files)
 # processProblemFiles()
 
+
+wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3 ])
+goodAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1 ])
+# for wrongauthor in wrongAuthors:
+#     for goodauthor in goodAuthors:
+#         if goodauthor in wrongauthor:
+
+
+for paper in [p for p in papers if 'ParsHed' in p]:
+    if 'authors' in paper['ParsHed']:
+        aus = paper['ParsHed']['authors']
+        for auther in [a for a in aus if len(re.findall(r'\w+', a)) > 3 ]:
+            for ga in goodAuthors:
+                if ga in auther:
+                    paper['ParsHed']['authors'].append(ga)
+                    auther.replace(ga, '')
+                    print 'name extracted from long string: ' + ga.encode('utf-8').strip()
+            # paper['ParsHed']['authors'].remove(auther)
+
+
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
+           
 
-with open('authors.json', 'w') as outfile:
-    json.dump(authors, outfile)
+with open('wrongauthors.txt', 'w') as outfile:
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3 ]):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
+
+# with open('authors.json', 'w') as outfile:
+#     json.dump(authors, outfile)
 
 with open('authors.txt', 'w') as outfile:
-    for author in sorted([a['name'] for a in authors]):
+    for author in sorted([a for a in authors]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
 # keys = papers[0].keys()

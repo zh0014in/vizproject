@@ -2,3 +2,4 @@ files/
 extract/
 *.json
 *.txt
+stanford-ner/

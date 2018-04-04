@@ -28,6 +28,7 @@ def getConfidence(tag):
     if tag.hasAttribute("confidence"):
         return float(tag.getAttribute("confidence"))
 
+
 def getValid(tag):
     if tag.hasAttribute("valid"):
         return tag.getAttribute("valid")
@@ -42,9 +43,9 @@ def getData(tag):
     if len(tag.childNodes) > 0:
         return tag.childNodes[0].data
     return ''
-    
 
-def getConfidenceAndValueAsList(SectLabel, variant, tag, paper = ""):
+
+def getConfidenceAndValueAsList(SectLabel, variant, tag, paper=""):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag+"s"] = []
     for value in values:
@@ -55,6 +56,7 @@ def getConfidenceAndValueAsList(SectLabel, variant, tag, paper = ""):
                 if data not in authors and len(data) > 1:
                     authors.append(data)
 
+
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag] = {}
@@ -62,7 +64,8 @@ def getConfidenceAndValueAsDict(SectLabel, variant, tag):
         if len(values) > 1:
             print tag + " has more than 1 instances"
         if getConfidence(values[0]) >= confidenceLimit:
-            SectLabel[tag] = getData(values[0])        
+            SectLabel[tag] = getData(values[0])
+
 
 def getCitationAsList(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
@@ -72,6 +75,7 @@ def getCitationAsList(c, citation, tag):
             t = getData(title)
             c[tag+"s"].append(t)
 
+
 def getCitationAsDict(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
     c[tag] = {}
@@ -80,8 +84,10 @@ def getCitationAsDict(c, citation, tag):
             print tag + " has more than 1 instances"
         c[tag] = getData(titles[0])
 
+
 papers = []
 problemFiles = []
+
 
 def processPaper(collection, paper):
     # Get all the algorithms in the collection
@@ -142,6 +148,7 @@ def processPaper(collection, paper):
             print 'missed'
     papers.append(paper)
 
+
 def process(files):
     for file in files[:]:
         # print file
@@ -155,7 +162,7 @@ def process(files):
             problemFiles.append(file)
             pass
         collection = DOMTree.documentElement
-        
+
         conferenceName = file.split("/")[2]
         year = conferenceName[1:]
         if int(year) > 18:
@@ -186,55 +193,65 @@ def processProblemFiles():
                     line = line.replace("<lastName>", "lastname_replace")
                     line = line.replace("<dougb", "dougb")
                     line = line.replace("<12.45>", "12.45")
-                    line = line.replace("<blackljlaffIroukos>", "blackljlaffIroukos")
-                    line = line.replace("<firstname.lastname>", "firstname.lastname_replace")
-                    line = line.replace("<sanae@kecl.cslab.ntt.co.jp>", "sanae@kecl.cslab.ntt.co.jp")
+                    line = line.replace(
+                        "<blackljlaffIroukos>", "blackljlaffIroukos")
+                    line = line.replace(
+                        "<firstname.lastname>", "firstname.lastname_replace")
+                    line = line.replace(
+                        "<sanae@kecl.cslab.ntt.co.jp>", "sanae@kecl.cslab.ntt.co.jp")
                     line = line.replace("<surename>", "surename_replace")
-                    line = line.replace("<markus.kreuzthaler,stefan.schulz>", "markus.kreuzthaler,stefan.schulz")
+                    line = line.replace(
+                        "<markus.kreuzthaler,stefan.schulz>", "markus.kreuzthaler,stefan.schulz")
                     line = line.replace("<http", "http")
-                    line = line.replace("<vramanarayanan,suendermann-oeft,aivanou,kevanini>", "vramanarayanan,suendermann-oeft,aivanou,kevanini")
+                    line = line.replace("<vramanarayanan,suendermann-oeft,aivanou,kevanini>",
+                                        "vramanarayanan,suendermann-oeft,aivanou,kevanini")
                 newLines.append(line)
         with open(file, 'w') as f:
             f.writelines(newLines)
     process(data)
 
+
 process(files)
 # processProblemFiles()
 
 
-wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3 ])
-goodAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1 ])
-# for wrongauthor in wrongAuthors:
-#     for goodauthor in goodAuthors:
-#         if goodauthor in wrongauthor:
+wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
+goodAuthors = sorted([a for a in authors if len(
+    re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1])
 
-
-for paper in [p for p in papers if 'ParsHed' in p]:
-    if 'authors' in paper['ParsHed']:
-        aus = paper['ParsHed']['authors']
-        for auther in [a for a in aus if len(re.findall(r'\w+', a)) > 3 ]:
-            for ga in goodAuthors:
-                if ga in auther:
-                    paper['ParsHed']['authors'].append(ga)
-                    auther.replace(ga, '')
-                    # print 'name extracted from long string: ' + ga.encode('utf-8').strip()
-            # paper['ParsHed']['authors'].remove(auther)
+# for paper in [p for p in papers if 'ParsHed' in p]:
+#     if 'authors' in paper['ParsHed']:
+#         aus = paper['ParsHed']['authors']
+#         for auther in [a for a in aus if len(re.findall(r'\w+', a)) > 3 ]:
+#             for ga in goodAuthors:
+#                 if ga in auther:
+#                     paper['ParsHed']['authors'].append(ga)
+#                     auther.replace(ga, '')
+# print 'name extracted from long string: ' + ga.encode('utf-8').strip()
+# paper['ParsHed']['authors'].remove(auther)
 
 
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
-           
+
+authorMappings = []
+for au in wrongAuthors:
+    auo = {}
+    auo[au] = {}
+    auo[au]['good'] = []
+    auo[au]['wrong'] = [au]
+    authorMappings.append(auo)
 
 with open('wrongauthors.txt', 'w') as outfile:
-    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3 ]):
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
 with open('goodAuthors.txt', 'w') as outfile:
-    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3 ]):
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
-# with open('authors.json', 'w') as outfile:
-#     json.dump(authors, outfile)
+with open('authormappings.json', 'w') as outfile:
+    json.dump(authorMappings, outfile)
 
 with open('authors.txt', 'w') as outfile:
     for author in sorted([a for a in authors]):

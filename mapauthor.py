@@ -1,22 +1,18 @@
 import re
 import json
 
-with open('authors.txt', 'r') as f:
-    authors = f.read().splitlines()
+with open('goodAuthors.txt', 'r') as f:
+    goodAuthors = f.read().splitlines()
 
-wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
-goodAuthors = sorted([a for a in authors if len(
-    re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1])
-# for wrongauthor in wrongAuthors:
-#     for goodauthor in goodAuthors:
-#         if goodauthor in wrongauthor:
+authormappings = json.load(open('authormappings.json'))
 
+with open('wrongauthors.txt', 'r') as f:
+    wrongAuthors = f.read().splitlines()
 
 def addToGoodAuthors(name):
     if len(re.findall(r'\w+', name.strip())) > 1 and len(re.findall(r'\w+', name.strip())) <= 3 and len(name) > 1:
         if name.strip() not in goodAuthors:
             goodAuthors.append(name.strip())
-            authors.append(name.strip())
             return True
     return False
 
@@ -41,7 +37,6 @@ def preprocess():
                 author = author.replace(ga, "")
         addToGoodAuthors(author)
 
-
 preprocess()
 
 mappings = []
@@ -60,8 +55,8 @@ for author in wrongAuthors:
 with open('authormappings.json', 'w') as outfile:
     json.dump(mappings, outfile)
 
-print len(authors)
+print len(goodAuthors)
 
-# with open('authors.txt', 'w') as outfile:
-#     for au in sorted([a for a in authors]):
-#         outfile.write("%s\n" % au.strip())
+with open('goodAuthors.txt', 'w') as outfile:
+    for au in sorted([a for a in goodAuthors]):
+        outfile.write("%s\n" % au.strip())

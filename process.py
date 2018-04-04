@@ -52,7 +52,7 @@ def getConfidenceAndValueAsList(SectLabel, variant, tag, paper = ""):
             data = getData(value)
             SectLabel[tag+"s"].append(data)
             if tag == 'author':
-                if data not in authors:
+                if data not in authors and len(data) > 1:
                     authors.append(data)
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
@@ -217,7 +217,7 @@ for paper in [p for p in papers if 'ParsHed' in p]:
                 if ga in auther:
                     paper['ParsHed']['authors'].append(ga)
                     auther.replace(ga, '')
-                    print 'name extracted from long string: ' + ga.encode('utf-8').strip()
+                    # print 'name extracted from long string: ' + ga.encode('utf-8').strip()
             # paper['ParsHed']['authors'].remove(auther)
 
 
@@ -227,6 +227,10 @@ with open('data1.json', 'w') as outfile:
 
 with open('wrongauthors.txt', 'w') as outfile:
     for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3 ]):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
+
+with open('goodAuthors.txt', 'w') as outfile:
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3 ]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
 # with open('authors.json', 'w') as outfile:

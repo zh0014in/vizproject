@@ -239,7 +239,7 @@ for au in wrongAuthors:
     auo = {}
     auo[au] = {}
     auo[au]['good'] = []
-    auo[au]['wrong'] = [au]
+    auo[au]['wrong'] = [au.encode('utf-8').strip()]
     authorMappings.append(auo)
 
 with open('wrongauthors.txt', 'w') as outfile:

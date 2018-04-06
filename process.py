@@ -1,6 +1,3 @@
-import urllib2
-import urllib
-import tarfile
 import os
 import xml.etree.ElementTree as ET
 import xml.sax as sax
@@ -9,43 +6,14 @@ import xml.dom.minidom as minidom
 import json
 import csv
 import sys
+import re
 
 if len(sys.argv) == 2:
     confidenceLimit = sys.argv[1]
 else:
     confidenceLimit = 0.7
 
-
-def downloadFiles():
-    url = "http://acl-arc.comp.nus.edu.sg/archives/acl-arc-160301-parscit/"
-    data = urllib2.urlopen(url+'files.txt')
-    testfile = urllib.URLopener()
-    for line in data:
-        line = line.strip(' \t\n\r')
-        if line.endswith('.tgz:'):
-            print line
-            testfile.retrieve(url+line[:-1], "files/"+line[:-1])
-
-
-def isFile(object):
-    try:
-        os.listdir(object)
-        return False
-    except Exception:
-        return True
-
-
-def extractFiles():
-    objects = os.listdir("files/")
-    for i in objects:
-        if isFile("files/" + i):
-            tar = tarfile.open("files/"+i)
-            tar.extractall("extract/")
-            tar.close()
-
-# downloadFiles()
-# extractFiles()
-
+authors = []
 files = []
 objects = os.listdir("extract/")
 for c in objects:
@@ -59,6 +27,7 @@ for c in objects:
 def getConfidence(tag):
     if tag.hasAttribute("confidence"):
         return float(tag.getAttribute("confidence"))
+
 
 def getValid(tag):
     if tag.hasAttribute("valid"):
@@ -74,14 +43,19 @@ def getData(tag):
     if len(tag.childNodes) > 0:
         return tag.childNodes[0].data
     return ''
-    
 
-def getConfidenceAndValueAsArray(SectLabel, variant, tag):
+
+def getConfidenceAndValueAsList(SectLabel, variant, tag, paper=""):
     values = variant.getElementsByTagName(tag)
     SectLabel[tag+"s"] = []
     for value in values:
         if getConfidence(value) >= confidenceLimit:
-            SectLabel[tag+"s"].append(getData(value))
+            data = getData(value)
+            SectLabel[tag+"s"].append(data)
+            if tag == 'author':
+                if data not in authors and len(data) > 1:
+                    authors.append(data)
+
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -90,15 +64,17 @@ def getConfidenceAndValueAsDict(SectLabel, variant, tag):
         if len(values) > 1:
             print tag + " has more than 1 instances"
         if getConfidence(values[0]) >= confidenceLimit:
-            SectLabel[tag] = getData(values[0])        
+            SectLabel[tag] = getData(values[0])
 
-def getCitationAsArray(c, citation, tag):
+
+def getCitationAsList(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
     c[tag+"s"] = []
     if titles is not None:
         for title in titles:
             t = getData(title)
             c[tag+"s"].append(t)
+
 
 def getCitationAsDict(c, citation, tag):
     titles = citation.getElementsByTagName(tag)
@@ -108,8 +84,10 @@ def getCitationAsDict(c, citation, tag):
             print tag + " has more than 1 instances"
         c[tag] = getData(titles[0])
 
+
 papers = []
 problemFiles = []
+
 
 def processPaper(collection, paper):
     # Get all the algorithms in the collection
@@ -126,11 +104,11 @@ def processPaper(collection, paper):
             if getConfidence(variant) >= confidenceLimit:
                 SectLabel["no"] = getNo(variant)
 
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'title')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'author')
-                getConfidenceAndValueAsArray(SectLabel, variant, 'affiliation')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'address')
-                # getConfidenceAndValueAsArray(SectLabel, variant, 'variant', 'email')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'title')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'author')
+                getConfidenceAndValueAsList(SectLabel, variant, 'affiliation')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'address')
+                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'email')
                 paper['SectLabel'] = SectLabel
         elif algorithmName == "ParsHed":
             # info about current paper
@@ -139,12 +117,12 @@ def processPaper(collection, paper):
             if getConfidence(variant) >= confidenceLimit:
                 # ParsHed["no"] = getNo(variant)
 
-                getConfidenceAndValueAsArray(ParsHed, variant, 'title')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'author')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'abstract')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'address')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'email')
-                getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
+                getConfidenceAndValueAsList(ParsHed, variant, 'title')
+                getConfidenceAndValueAsList(ParsHed, variant, 'author',paper)
+                getConfidenceAndValueAsList(ParsHed, variant, 'abstract')
+                getConfidenceAndValueAsList(ParsHed, variant, 'address')
+                getConfidenceAndValueAsList(ParsHed, variant, 'email')
+                getConfidenceAndValueAsList(ParsHed, variant, 'affiliation')
                 # getConfidenceAndValueAsDict(ParsHed, variant, 'web')
                 paper['ParsHed'] = ParsHed
             pass
@@ -157,7 +135,7 @@ def processPaper(collection, paper):
                 if getValid(citation) == 'true':
                     c = {}
 
-                    getCitationAsArray(c, citation, 'author')
+                    getCitationAsList(c, citation, 'author')
                     getCitationAsDict(c, citation, 'title')
                     getCitationAsDict(c, citation, 'booktitle')
                     getCitationAsDict(c, citation, 'location')
@@ -170,8 +148,9 @@ def processPaper(collection, paper):
             print 'missed'
     papers.append(paper)
 
+
 def process(files):
-    for file in files[0:50]:
+    for file in files[:]:
         # print file
         paper = {}
         # Open XML document using minidom parser
@@ -183,7 +162,7 @@ def process(files):
             problemFiles.append(file)
             pass
         collection = DOMTree.documentElement
-        
+
         conferenceName = file.split("/")[2]
         year = conferenceName[1:]
         if int(year) > 18:
@@ -214,23 +193,69 @@ def processProblemFiles():
                     line = line.replace("<lastName>", "lastname_replace")
                     line = line.replace("<dougb", "dougb")
                     line = line.replace("<12.45>", "12.45")
-                    line = line.replace("<blackljlaffIroukos>", "blackljlaffIroukos")
-                    line = line.replace("<firstname.lastname>", "firstname.lastname_replace")
-                    line = line.replace("<sanae@kecl.cslab.ntt.co.jp>", "sanae@kecl.cslab.ntt.co.jp")
+                    line = line.replace(
+                        "<blackljlaffIroukos>", "blackljlaffIroukos")
+                    line = line.replace(
+                        "<firstname.lastname>", "firstname.lastname_replace")
+                    line = line.replace(
+                        "<sanae@kecl.cslab.ntt.co.jp>", "sanae@kecl.cslab.ntt.co.jp")
                     line = line.replace("<surename>", "surename_replace")
-                    line = line.replace("<markus.kreuzthaler,stefan.schulz>", "markus.kreuzthaler,stefan.schulz")
+                    line = line.replace(
+                        "<markus.kreuzthaler,stefan.schulz>", "markus.kreuzthaler,stefan.schulz")
                     line = line.replace("<http", "http")
-                    line = line.replace("<vramanarayanan,suendermann-oeft,aivanou,kevanini>", "vramanarayanan,suendermann-oeft,aivanou,kevanini")
+                    line = line.replace("<vramanarayanan,suendermann-oeft,aivanou,kevanini>",
+                                        "vramanarayanan,suendermann-oeft,aivanou,kevanini")
                 newLines.append(line)
         with open(file, 'w') as f:
             f.writelines(newLines)
     process(data)
 
+
 process(files)
 # processProblemFiles()
 
+
+wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
+goodAuthors = sorted([a for a in authors if len(
+    re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1])
+
+# for paper in [p for p in papers if 'ParsHed' in p]:
+#     if 'authors' in paper['ParsHed']:
+#         aus = paper['ParsHed']['authors']
+#         for auther in [a for a in aus if len(re.findall(r'\w+', a)) > 3 ]:
+#             for ga in goodAuthors:
+#                 if ga in auther:
+#                     paper['ParsHed']['authors'].append(ga)
+#                     auther.replace(ga, '')
+# print 'name extracted from long string: ' + ga.encode('utf-8').strip()
+# paper['ParsHed']['authors'].remove(auther)
+
+
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
+
+authorMappings = []
+for au in wrongAuthors:
+    auo = {}
+    auo[au] = {}
+    auo[au]['good'] = []
+    auo[au]['wrong'] = [au.encode('utf-8').strip()]
+    authorMappings.append(auo)
+
+with open('wrongauthors.txt', 'w') as outfile:
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3]):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
+
+with open('goodAuthors.txt', 'w') as outfile:
+    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3]):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
+
+with open('authormappings.json', 'w') as outfile:
+    json.dump(authorMappings, outfile)
+
+with open('authors.txt', 'w') as outfile:
+    for author in sorted([a for a in authors]):
+        outfile.write("%s\n" % author.encode('utf-8').strip())
 
 # keys = papers[0].keys()
 # with open('data.csv', 'wb') as output_file:

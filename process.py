@@ -13,7 +13,7 @@ import sys
 if len(sys.argv) == 2:
     confidenceLimit = sys.argv[1]
 else:
-    confidenceLimit = 0.9
+    confidenceLimit = 0.7
 
 
 def downloadFiles():
@@ -137,7 +137,7 @@ def processPaper(collection, paper):
             ParsHed = {}
             variant = algorithm.getElementsByTagName('variant')[0]
             if getConfidence(variant) >= confidenceLimit:
-                ParsHed["no"] = getNo(variant)
+                # ParsHed["no"] = getNo(variant)
 
                 getConfidenceAndValueAsArray(ParsHed, variant, 'title')
                 getConfidenceAndValueAsArray(ParsHed, variant, 'author')
@@ -145,7 +145,7 @@ def processPaper(collection, paper):
                 getConfidenceAndValueAsArray(ParsHed, variant, 'address')
                 getConfidenceAndValueAsArray(ParsHed, variant, 'email')
                 getConfidenceAndValueAsArray(ParsHed, variant, 'affiliation')
-                getConfidenceAndValueAsDict(ParsHed, variant, 'web')
+                # getConfidenceAndValueAsDict(ParsHed, variant, 'web')
                 paper['ParsHed'] = ParsHed
             pass
 

@@ -44,33 +44,64 @@ def splitStringByName(name, string):
         addToGoodAuthors(au)
 
 
-def preprocess():
+# def preprocess():
+#     for mapping in authormappings:
+#         for value in mapping:
+#             for wrongAuthor in mapping[value]['wrong']:
+#                 authorcopy = (wrongAuthor + '.')[:-1].encode('utf-8').strip()
+#                 for ga in sorted(goodAuthors, key=len, reverse=True):
+#                     if checkNameInString(ga, authorcopy):
+#                         # splitStringByName(ga, author)
+#                         authorcopy = authorcopy.replace(ga, "")
+#                         break
+#                 addToGoodAuthors(authorcopy)
+
+# preprocess()
+
+def wordCount(string):
+    return len(re.findall(r'\w+', string.strip()))
+
+def checkNWord(string, N):
+    words = string.strip().split()
+    wc = len(words)
+    if wc < N:
+        return False,0,0,0
+    for i in range(0, wc-N+1):
+        if ' '.join(words[i:N]) in goodAuthors:
+            return ' '.join(words[i:N]), i, wc, N
+    return False, 0,0,0
+
+for j in [4,3,2,1]:
     for mapping in authormappings:
         for value in mapping:
             for wrongAuthor in mapping[value]['wrong']:
-                authorcopy = (wrongAuthor + '.')[:-1].encode('utf-8').strip()
-                for ga in sorted(goodAuthors, key=len, reverse=True):
-                    if checkNameInString(ga, authorcopy):
-                        # splitStringByName(ga, author)
-                        authorcopy = authorcopy.replace(ga, "")
-                        break
-                addToGoodAuthors(authorcopy)
+                wrongAuthor = wrongAuthor.strip()
+                checked, i, wc, N = checkNWord(wrongAuthor, j)
+                if checked != False:
+                    mapping[value]['good'].append(checked)
+                    if i == 0 or i == wc - N:
+                        print 'no split'
+                        wrongAuthor = wrongAuthor.replace(checked, '')
+                    else:
+                        print 'splitted'
+                        splitted = wrongAuthor.split(checked)
+                        wrongAuthor = splitted[0].strip()
+                        mapping[value]['wrong'].append(splitted[1].strip())
 
-preprocess()
 
-for mapping in authormappings:
-    for value in mapping:
-        for wrongAuthor in mapping[value]['wrong']:
-            wrongAuthor = wrongAuthor.encode('utf-8').strip()
-            for ga in sorted(goodAuthors, key=len, reverse=True):
-                if ga.startswith('Margaret Mitchell') and 'Margaret Mitchell' in wrongAuthor:
-                    print ga + ', ' + wrongAuthor
-                if checkNameInString(ga, wrongAuthor):
-                    mapping[value]['good'].append(ga)
-                    wrongAuthor = wrongAuthor.replace(ga, "")
-                    break
-            if len(re.findall(r'\w+', wrongAuthor.strip())) > 1 and len(re.findall(r'\w+',wrongAuthor.strip())) <= 3 and len(wrongAuthor) > 1:
-                mapping[value]['good'].append(wrongAuthor.strip())
+# for mapping in authormappings:
+#     for value in mapping:
+#         for wrongAuthor in mapping[value]['wrong']:
+#             wrongAuthor = wrongAuthor.encode('utf-8').strip()
+#             for ga in sorted(goodAuthors, key=len, reverse=True):
+#                 if ga.startswith('Margaret Mitchell') and 'Margaret Mitchell' in wrongAuthor:
+#                     print ga + ', ' + wrongAuthor
+#                 if checkNameInString(ga, wrongAuthor):
+#                     mapping[value]['good'].append(ga)
+#                     wrongAuthor = wrongAuthor.replace(ga, "")
+#                     break
+#             if len(re.findall(r'\w+', wrongAuthor.strip())) > 1 and len(re.findall(r'\w+',wrongAuthor.strip())) <= 3 and len(wrongAuthor) > 1:
+#                 mapping[value]['good'].append(wrongAuthor.strip())
 
 with open('authormappings.json', 'w') as outfile:
     json.dump(authormappings, outfile)

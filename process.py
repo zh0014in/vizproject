@@ -150,7 +150,7 @@ def processPaper(collection, paper):
 
 
 def process(files):
-    for file in files[:]:
+    for file in files[:1000]:
         # print file
         paper = {}
         # Open XML document using minidom parser

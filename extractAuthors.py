@@ -4,11 +4,12 @@ import sys
 if len(sys.argv) == 2:
     confidenceLimit = sys.argv[1]
 else:
-    confidenceLimit = 0.7
+    confidenceLimit = 0.8
 
 papers = json.load(open('data('+str(confidenceLimit)+').json'))
 
 authors = {}
+citations = {}
 
 for paper in [p for p in papers if 'authors' in p]:
     for author in paper['authors']:
@@ -28,3 +29,4 @@ for paper in [p for p in papers if 'authors' in p]:
 
 with open('authors('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(authors, outfile)
+

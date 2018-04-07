@@ -11,7 +11,7 @@ import re
 if len(sys.argv) == 2:
     confidenceLimit = sys.argv[1]
 else:
-    confidenceLimit = 0.7
+    confidenceLimit = 0.8
 
 authors = []
 files = []
@@ -157,7 +157,7 @@ def processPaper(collection, paper):
 
 
 def process(files):
-    for file in files[:500]:
+    for file in files[:]:
         # print file
         paper = {}
         # Open XML document using minidom parser

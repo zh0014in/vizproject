@@ -9,7 +9,7 @@ else:
 papers = json.load(open('data('+str(confidenceLimit)+').json'))
 
 authors = {}
-citations = {}
+citationsByYear = {}
 
 for paper in [p for p in papers if 'authors' in p]:
     for author in paper['authors']:
@@ -30,3 +30,16 @@ for paper in [p for p in papers if 'authors' in p]:
 with open('authors('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(authors, outfile)
 
+for paper in papers:
+    for citation in paper['citations']:
+        if citation not in citationsByYear:
+            citationsByYear[citation] = {}
+            citationsByYear[citation][paper['year']] = 1
+        else:
+            if paper['year'] not in citationsByYear[paper['year']]:
+                citationsByYear[citation][paper['year']] = 1
+            else:
+                citationsByYear[citation][paper['year']] = citationsByYear[citation][paper['year']] + 1
+
+with open('citationByYear('+str(confidenceLimit)+').json', 'w') as outfile:
+    json.dump(citationsByYear, outfile)

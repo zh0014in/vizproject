@@ -150,7 +150,7 @@ def processPaper(collection, paper):
 
 
 def process(files):
-    for file in files[:1000]:
+    for file in files[:]:
         # print file
         paper = {}
         # Open XML document using minidom parser
@@ -173,6 +173,8 @@ def process(files):
         paper["year"] = int(year)
 
         processPaper(collection, paper)
+
+
 
 
 def processProblemFiles():
@@ -210,9 +212,9 @@ def processProblemFiles():
             f.writelines(newLines)
     process(data)
 
-
-process(files)
 # processProblemFiles()
+process(files)
+
 
 
 wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
@@ -263,5 +265,5 @@ with open('authors.txt', 'w') as outfile:
 #     dict_writer.writeheader()
 #     dict_writer.writerows(papers)
 
-# with open('problemFiles.json', 'w') as outfile:
-#     json.dump(problemFiles, outfile)
+with open('problemFiles.json', 'w') as outfile:
+    json.dump(problemFiles, outfile)

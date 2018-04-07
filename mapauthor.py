@@ -9,8 +9,10 @@ authormappings = json.load(open('authormappings.json'))
 with open('wrongauthors.txt', 'r') as f:
     wrongAuthors = f.read().splitlines()
 
-def addToGoodAuthors(name):
-    if len(re.findall(r'\w+', name.strip())) > 1 and len(re.findall(r'\w+', name.strip())) <= 3 and len(name) > 1:
+def addToGoodAuthors(name, mapping):
+    if len(re.findall(r'\w+', name.strip())) >= 1 and len(re.findall(r'\w+', name.strip())) <= 3 and len(name) > 1:
+        mapping['good'].append(name.strip())
+        mapping['wrong'].remove(name.strip())
         if name.strip() not in goodAuthors:
             goodAuthors.append(name.strip())
             return True
@@ -39,9 +41,9 @@ def checkNameInString(name, string):
         return False
     return True
 
-def splitStringByName(name, string):
-    for au in [a.strip() for a in string.split(name)]:
-        addToGoodAuthors(au)
+# def splitStringByName(name, string):
+#     for au in [a.strip() for a in string.split(name)]:
+#         addToGoodAuthors(au)
 
 
 # def preprocess():
@@ -67,26 +69,29 @@ def checkNWord(string, N):
     if wc < N:
         return False,0,0,0
     for i in range(0, wc-N+1):
-        if ' '.join(words[i:N]) in goodAuthors:
-            return ' '.join(words[i:N]), i, wc, N
+        if ' '.join(words[i:i+N]) in goodAuthors:
+            return ' '.join(words[i:i+N]), i, wc, N
     return False, 0,0,0
 
-for j in [4,3,2,1]:
-    for mapping in authormappings:
-        for value in mapping:
-            for wrongAuthor in mapping[value]['wrong']:
+for j in [4,3,2]:
+    for idx, mapping in enumerate(authormappings):
+        for idy, value in enumerate(mapping):
+            for idz, wrongAuthor in enumerate(mapping[value]['wrong']):
                 wrongAuthor = wrongAuthor.strip()
                 checked, i, wc, N = checkNWord(wrongAuthor, j)
                 if checked != False:
                     mapping[value]['good'].append(checked)
                     if i == 0 or i == wc - N:
-                        print 'no split'
-                        wrongAuthor = wrongAuthor.replace(checked, '')
+                        # print 'no split'
+                        mapping[value]['wrong'][idz] = wrongAuthor.replace(checked, '').strip()
+                        addToGoodAuthors(mapping[value]['wrong'][idz], mapping[value])
                     else:
-                        print 'splitted'
+                        # print 'splitted'
                         splitted = wrongAuthor.split(checked)
-                        wrongAuthor = splitted[0].strip()
+                        mapping[value]['wrong'][idz] = splitted[0].strip()
                         mapping[value]['wrong'].append(splitted[1].strip())
+                        addToGoodAuthors(splitted[0].strip(), mapping[value])
+                        addToGoodAuthors(splitted[1].strip(), mapping[value])
 
 
 # for mapping in authormappings:

@@ -15,6 +15,9 @@ else:
 
 authors = []
 files = []
+authormappingsfinal = json.load(open('authormappingsfinal.json'))
+mappingKeys = [a for a in authormappingsfinal]
+
 objects = os.listdir("extract/")
 for c in objects:
     cObjects = os.listdir("extract/"+c)
@@ -51,11 +54,15 @@ def getConfidenceAndValueAsList(SectLabel, variant, tag, paper=""):
     for value in values:
         if getConfidence(value) >= confidenceLimit:
             data = getData(value)
-            SectLabel[tag+"s"].append(data)
             if tag == 'author':
+                if data in mappingKeys and len(authormappingsfinal[data]['good']) > 0:
+                    SectLabel[tag+"s"].extend(authormappingsfinal[data]['good'])
+                else:
+                    SectLabel[tag+"s"].append(data)
                 if data not in authors and len(data) > 1:
                     authors.append(data)
-
+            else:
+                SectLabel[tag+"s"].append(data)
 
 def getConfidenceAndValueAsDict(SectLabel, variant, tag):
     values = variant.getElementsByTagName(tag)
@@ -150,7 +157,7 @@ def processPaper(collection, paper):
 
 
 def process(files):
-    for file in files[:]:
+    for file in files[:500]:
         # print file
         paper = {}
         # Open XML document using minidom parser
@@ -236,13 +243,11 @@ goodAuthors = sorted([a for a in authors if len(
 with open('data1.json', 'w') as outfile:
     json.dump(papers, outfile)
 
-authorMappings = []
+authorMappings = {}
 for au in wrongAuthors:
-    auo = {}
-    auo[au] = {}
-    auo[au]['good'] = []
-    auo[au]['wrong'] = [au.encode('utf-8').strip()]
-    authorMappings.append(auo)
+    authorMappings[au] = {}
+    authorMappings[au]['good'] = []
+    authorMappings[au]['wrong'] = [au.encode('utf-8').strip()]
 
 with open('wrongauthors.txt', 'w') as outfile:
     for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3]):
@@ -258,12 +263,6 @@ with open('authormappings.json', 'w') as outfile:
 with open('authors.txt', 'w') as outfile:
     for author in sorted([a for a in authors]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
-
-# keys = papers[0].keys()
-# with open('data.csv', 'wb') as output_file:
-#     dict_writer = csv.DictWriter(output_file, keys)
-#     dict_writer.writeheader()
-#     dict_writer.writerows(papers)
 
 with open('problemFiles.json', 'w') as outfile:
     json.dump(problemFiles, outfile)

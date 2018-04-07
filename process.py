@@ -124,14 +124,14 @@ def processPaper(collection, paper):
             if getConfidence(variant) >= confidenceLimit:
                 # ParsHed["no"] = getNo(variant)
 
-                getConfidenceAndValueAsList(ParsHed, variant, 'title')
-                getConfidenceAndValueAsList(ParsHed, variant, 'author',paper)
-                getConfidenceAndValueAsList(ParsHed, variant, 'abstract')
-                getConfidenceAndValueAsList(ParsHed, variant, 'address')
-                getConfidenceAndValueAsList(ParsHed, variant, 'email')
-                getConfidenceAndValueAsList(ParsHed, variant, 'affiliation')
+                getConfidenceAndValueAsList(paper, variant, 'title')
+                getConfidenceAndValueAsList(paper, variant, 'author',paper)
+                # getConfidenceAndValueAsList(paper, variant, 'abstract')
+                getConfidenceAndValueAsList(paper, variant, 'address')
+                getConfidenceAndValueAsList(paper, variant, 'email')
+                getConfidenceAndValueAsList(paper, variant, 'affiliation')
                 # getConfidenceAndValueAsDict(ParsHed, variant, 'web')
-                paper['ParsHed'] = ParsHed
+                # paper['ParsHed'] = ParsHed
             pass
 
         elif algorithmName == "ParsCit":
@@ -181,9 +181,6 @@ def process(files):
 
         processPaper(collection, paper)
 
-
-
-
 def processProblemFiles():
     data = json.load(open('problemFiles.json'))
 
@@ -222,25 +219,11 @@ def processProblemFiles():
 # processProblemFiles()
 process(files)
 
-
-
 wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
 goodAuthors = sorted([a for a in authors if len(
     re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1])
 
-# for paper in [p for p in papers if 'ParsHed' in p]:
-#     if 'authors' in paper['ParsHed']:
-#         aus = paper['ParsHed']['authors']
-#         for auther in [a for a in aus if len(re.findall(r'\w+', a)) > 3 ]:
-#             for ga in goodAuthors:
-#                 if ga in auther:
-#                     paper['ParsHed']['authors'].append(ga)
-#                     auther.replace(ga, '')
-# print 'name extracted from long string: ' + ga.encode('utf-8').strip()
-# paper['ParsHed']['authors'].remove(auther)
-
-
-with open('data1.json', 'w') as outfile:
+with open('data('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(papers, outfile)
 
 authorMappings = {}
@@ -249,20 +232,12 @@ for au in wrongAuthors:
     authorMappings[au]['good'] = []
     authorMappings[au]['wrong'] = [au.encode('utf-8').strip()]
 
-with open('wrongauthors.txt', 'w') as outfile:
-    for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3]):
-        outfile.write("%s\n" % author.encode('utf-8').strip())
-
-with open('goodAuthors.txt', 'w') as outfile:
+with open('goodAuthors('+str(confidenceLimit)+').txt', 'w') as outfile:
     for author in sorted([a for a in authors if len(re.findall(r'\w+', a)) <= 3]):
         outfile.write("%s\n" % author.encode('utf-8').strip())
 
-with open('authormappings.json', 'w') as outfile:
+with open('authormappings('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(authorMappings, outfile)
 
-with open('authors.txt', 'w') as outfile:
-    for author in sorted([a for a in authors]):
-        outfile.write("%s\n" % author.encode('utf-8').strip())
-
-with open('problemFiles.json', 'w') as outfile:
+with open('problemFiles('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(problemFiles, outfile)

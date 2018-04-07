@@ -1,13 +1,16 @@
 import re
 import json
+import sys
 
-with open('goodAuthors.txt', 'r') as f:
+if len(sys.argv) == 2:
+    confidenceLimit = sys.argv[1]
+else:
+    confidenceLimit = 0.7
+
+with open('goodAuthors('+str(confidenceLimit)+').txt', 'r') as f:
     goodAuthors = f.read().splitlines()
 
-authormappings = json.load(open('authormappings.json'))
-
-with open('wrongauthors.txt', 'r') as f:
-    wrongAuthors = f.read().splitlines()
+authormappings = json.load(open('authormappings('+str(confidenceLimit)+').json'))
 
 def addToGoodAuthors(name, mapping):
     if len(re.findall(r'\w+', name.strip())) >= 1 and len(re.findall(r'\w+', name.strip())) <= 3 and len(name) > 1:
@@ -40,25 +43,6 @@ def checkNameInString(name, string):
     if j+i == len(stringSplit)-1 and len(stringSplit[-1:][0]) == 1:
         return False
     return True
-
-# def splitStringByName(name, string):
-#     for au in [a.strip() for a in string.split(name)]:
-#         addToGoodAuthors(au)
-
-
-# def preprocess():
-#     for mapping in authormappings:
-#         for value in mapping:
-#             for wrongAuthor in mapping[value]['wrong']:
-#                 authorcopy = (wrongAuthor + '.')[:-1].encode('utf-8').strip()
-#                 for ga in sorted(goodAuthors, key=len, reverse=True):
-#                     if checkNameInString(ga, authorcopy):
-#                         # splitStringByName(ga, author)
-#                         authorcopy = authorcopy.replace(ga, "")
-#                         break
-#                 addToGoodAuthors(authorcopy)
-
-# preprocess()
 
 def wordCount(string):
     return len(re.findall(r'\w+', string.strip()))

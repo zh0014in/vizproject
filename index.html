@@ -1,0 +1,169 @@
+<html>
+
+<head>
+    <link href="node_modules/c3/c3.min.css" rel="stylesheet">
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .bar:hover {
+            fill: brown;
+        }
+
+        .axis--x path {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <svg width="960" height="500"></svg> -->
+    Top <input id="top" type="number" value="5"> citations for year <input id="year" type="number" value="2008">
+    <div id="main" style="width: 1200px;height:400px;"></div>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/d3/build/d3.min.js"></script>
+    <script src="node_modules/c3/c3.min.js"></script>
+    <script src="node_modules/echarts/dist/echarts.min.js"></script>
+    <script src="node_modules/linqjs/dist/linq.min.js"></script>
+    <script>
+        (function () {
+            var citationByYear;
+            var selectedYear = 2008;
+            var top = 5;
+            document.getElementById('top').onchange = topChanged;
+            document.getElementById('year').onchange = yearChanged;
+            function topChanged(){
+                top = document.getElementById('top').value;
+                prepareCitationByYear();
+                echartsDraw();
+            }
+            function yearChanged(){
+                selectedYear = document.getElementById('year').value;
+                prepareCitationByYear();
+                echartsDraw();
+            }
+            jQuery.get('citationByYear(0.8).json', function (data) {
+                citationByYear = data;
+                prepareCitationByYear();
+                // c3Draw();
+                echartsDraw();
+            });
+
+            var yearResult = []
+            function prepareCitationByYear() {
+                yearResult = []
+                for (var key in citationByYear) {
+                    if (!citationByYear.hasOwnProperty(key)) continue;
+                    var obj = citationByYear[key];
+                    for (var prop in obj) {
+                        if (!obj.hasOwnProperty(prop)) continue;
+                        if (parseInt(prop) == selectedYear) {
+                            yearResult.push({
+                                paper: key,
+                                count: obj[prop]
+                            });
+                        }
+                    }
+                }
+                yearResult.sort(compare);
+                yearResult = yearResult.slice(0, top);
+                console.log(yearResult)
+            }
+
+            function c3Draw() {
+                var svg = d3.select("svg"),
+                    margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                    width = +svg.attr("width") - margin.left - margin.right,
+                    height = +svg.attr("height") - margin.top - margin.bottom;
+
+                var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+                    y = d3.scaleLinear().rangeRound([height, 0]);
+
+                var g = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                x.domain(yearResult.map(function (d) { return d.paper; }));
+                y.domain([0, d3.max(yearResult, function (d) { return d.count; })]);
+
+                // g.append("g")
+                //     .attr("class", "axis axis--x")
+                //     .attr("transform", "translate(0," + height + ")")
+                //     .call(d3.axisBottom(x));
+
+                g.append("g")
+                    .attr("class", "axis axis--y")
+                    // .call(d3.axisLeft(y).ticks(10, "%"))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", "0.71em")
+                    .attr("text-anchor", "end")
+                    .text("count");
+
+                g.selectAll(".bar")
+                    .data(yearResult)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function (d) { return x(d.paper); })
+                    .attr("y", function (d) { return y(d.count); })
+                    .attr("width", x.bandwidth())
+                    .attr("height", function (d) { return height - y(d.count); })
+                    .attr("data-legend", function (d) { return d.paper });
+
+                legend = svg.append("g")
+                    .attr("class", "legend")
+                    .attr("transform", "translate(50,30)")
+                    .style("font-size", "12px")
+                    .call(d3.legend)
+            }
+
+            function echartsDraw() {
+                var myChart = echarts.init(document.getElementById('main'));
+
+                var option = {
+                    title: {
+                        text: ''
+                    },
+                    tooltip: {},
+                    legend: {
+                        data: []
+                    },
+                    xAxis: {
+                        type: 'value'
+                    },
+                    yAxis: {
+                        type: 'category',
+                        position: 'left',
+                        inverse: true,
+                        axisTick: {
+                            inside: true
+                        },
+                        scale: true,
+                        data: yearResult.select(function (x) { return x.paper; })
+                    },
+                    grid: {
+                        left: 435
+                    },
+                    series: [{
+                        name: 'paper title',
+                        type: 'bar',
+                        data: yearResult.select(function (x) { return x.count; })
+                    }]
+                };
+
+                myChart.setOption(option);
+            }
+
+            function compare(a, b) {
+                if (a.count < b.count)
+                    return 1;
+                if (a.count > b.count)
+                    return -1;
+                return 0;
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -3,3 +3,4 @@ extract/
 *.json
 *.txt
 stanford-ner/
+node_modules/

@@ -19,8 +19,25 @@
 
 <body>
     <!-- <svg width="960" height="500"></svg> -->
-    Top <input id="top" type="number" value="5"> citations for year <input id="year" type="number" value="2008">
-    <div id="main" style="width: 1200px;height:400px;"></div>
+    Top
+    <input id="top1" type="number" value="5"> citations for year
+    <input id="year1" type="number" value="2008">
+    <div id="main1" style="width: 1200px;height:400px;"></div>
+    Top
+    <input id="top2" type="number" value="5"> citations for conference
+    <select id="conference">
+        <option value="A" selected>A</option>
+        <option value="D">D</option>
+        <option value="E">E</option>
+        <option value="J">J</option>
+        <option value="K">K</option>
+        <option value="N">N</option>
+        <option value="P">P</option>
+        <option value="Q">Q</option>
+        <option value="S">S</option>
+        <option value="W">W</option>
+    </select>
+    <div id="main2" style="width: 1200px;height:400px;"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/d3/build/d3.min.js"></script>
     <script src="node_modules/c3/c3.min.js"></script>
@@ -28,25 +45,44 @@
     <script src="node_modules/linqjs/dist/linq.min.js"></script>
     <script>
         (function () {
-            var citationByYear;
-            var selectedYear = 2008;
-            var top = 5;
-            document.getElementById('top').onchange = topChanged;
-            document.getElementById('year').onchange = yearChanged;
-            function topChanged(){
-                top = document.getElementById('top').value;
+            var citationByYear, citationByConference;
+            var year1 = 2008;
+            var selectedConference = 'A';
+            var top1 = 5, top2 = 5;
+            document.getElementById('top1').onchange = top1Changed;
+            document.getElementById('year1').onchange = year2Changed;
+            document.getElementById('top2').onchange = top2Changed;
+            document.getElementById('conference').onchange = conferenceChanged;
+            document.getElementById('')
+            function top1Changed() {
+                top1 = document.getElementById('top1').value;
                 prepareCitationByYear();
-                echartsDraw();
+                echartsDraw('main1', yearResult);
             }
-            function yearChanged(){
-                selectedYear = document.getElementById('year').value;
+            function year2Changed() {
+                year1 = document.getElementById('year1').value;
                 prepareCitationByYear();
-                echartsDraw();
+                echartsDraw('main1', yearResult);
+            }
+            function top2Changed() {
+                top2 = document.getElementById('top2').value;
+                prepareCitationByConference();
+                echartsDraw('main2', conferenceResult);
+            }
+            function conferenceChanged() {
+                selectedConference = document.getElementById('conference').value;
+                prepareCitationByConference();
+                echartsDraw('main2', conferenceResult);
             }
             jQuery.get('citationByYear(0.8).json', function (data) {
                 citationByYear = data;
                 prepareCitationByYear();
-                echartsDraw();
+                echartsDraw('main1', yearResult);
+            });
+            jQuery.get('citationByConference(0.8).json', function (data) {
+                citationByConference = data;
+                prepareCitationByConference();
+                echartsDraw('main2', conferenceResult);
             });
 
             var yearResult = []
@@ -57,7 +93,7 @@
                     var obj = citationByYear[key];
                     for (var prop in obj) {
                         if (!obj.hasOwnProperty(prop)) continue;
-                        if (parseInt(prop) == selectedYear) {
+                        if (parseInt(prop) == year1) {
                             yearResult.push({
                                 paper: key,
                                 count: obj[prop]
@@ -66,16 +102,31 @@
                     }
                 }
                 yearResult.sort(compare);
-                yearResult = yearResult.slice(0, top);
+                yearResult = yearResult.slice(0, top1);
                 console.log(yearResult)
             }
-
-            function prepareCitationByConference(){
-
+            var conferenceResult = [];
+            function prepareCitationByConference() {
+                conferenceResult = [];
+                for (var key in citationByConference) {
+                    if (!citationByConference.hasOwnProperty(key)) continue;
+                    var obj = citationByConference[key];
+                    for (var prop in obj) {
+                        if (!obj.hasOwnProperty(prop)) continue;
+                        if (prop == selectedConference) {
+                            conferenceResult.push({
+                                paper: key,
+                                count: obj[prop]
+                            });
+                        }
+                    }
+                }
+                conferenceResult.sort(compare);
+                conferenceResult = conferenceResult.slice(0, top2);
             }
 
-            function echartsDraw() {
-                var myChart = echarts.init(document.getElementById('main'));
+            function echartsDraw(id, data) {
+                var myChart = echarts.init(document.getElementById(id));
 
                 var option = {
                     title: {
@@ -96,15 +147,16 @@
                             inside: true
                         },
                         scale: true,
-                        data: yearResult.select(function (x) { return x.paper; })
+                        data: data.select(function (x) { return x.paper; })
                     },
                     grid: {
-                        left: 435
+                        left: 550
                     },
                     series: [{
                         name: 'paper title',
                         type: 'bar',
-                        data: yearResult.select(function (x) { return x.count; })
+                        // itemStyle: { color: '#2f4554' },
+                        data: data.select(function (x) { return x.count; })
                     }]
                 };
 

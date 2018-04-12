@@ -94,7 +94,7 @@ def getCitationAsDict(c, citation, tag):
 
 papers = []
 problemFiles = []
-
+paperTitles = []
 
 def processPaper(collection, paper):
     # Get all the algorithms in the collection
@@ -132,6 +132,9 @@ def processPaper(collection, paper):
                 getConfidenceAndValueAsList(paper, variant, 'affiliation')
                 # getConfidenceAndValueAsDict(ParsHed, variant, 'web')
                 # paper['ParsHed'] = ParsHed
+                if 'titles' in paper:
+                    for t in [a for a in paper['titles'] if a not in paperTitles]:
+                        paperTitles.append(t)
             pass
 
         elif algorithmName == "ParsCit":
@@ -148,6 +151,10 @@ def processPaper(collection, paper):
                     getCitationAsDict(c, citation, 'location')
                     getCitationAsDict(c, citation, 'marker')
                     getCitationAsDict(c, citation, 'journal')
+
+                    if 'title' in c and c['title'] not in paperTitles:
+                        print c['title']
+                        paperTitles.append(c['title'])
 
                     paper['citations'].append(c)
             pass
@@ -222,6 +229,10 @@ process(files)
 wrongAuthors = sorted([a for a in authors if len(re.findall(r'\w+', a)) > 3])
 goodAuthors = sorted([a for a in authors if len(
     re.findall(r'\w+', a)) <= 3 and len(re.findall(r'\w+', a)) > 1])
+
+with open('paperTitles(' + str(confidenceLimit)+').txt', 'w') as outfile:
+    for t in sorted(paperTitles):
+        outfile.write("%s\n" % t.encode('utf-8').strip())
 
 with open('data('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(papers, outfile)

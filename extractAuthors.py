@@ -30,6 +30,23 @@ with open('authors('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(authors, outfile)
 
 
+years = {}
+
+for paper in [p for p in papers if 'year' in p]:
+    year = paper['year']
+    conference = paper['conference']
+    if 'citations' in paper:
+        if year not in years:
+            years[year] = {}
+            years[year][conference] = len(paper['citations'])
+        else:
+            if conference not in years[year]:
+                years[year][conference] = len(paper['citations'])
+            else:
+                years[year][conference] = len(paper['citations']) + years[year][conference]
+
+with open('years('+str(confidenceLimit)+').json', 'w') as outfile:
+    json.dump(years, outfile)
 
 
 citationsByYear = {}

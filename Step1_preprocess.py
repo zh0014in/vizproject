@@ -8,7 +8,7 @@ sys.setdefaultencoding('utf8')
 import os
 import re
 import nltk
-#nltk.download() #first time run need to download corpus
+# nltk.download() #first time run need to download corpus
 from nltk.corpus import stopwords
 import simplejson as json
 #import pickle
@@ -112,13 +112,19 @@ if __name__ == "__main__":
     #need to change to only preserve high frequency words.
     print("The number of unique words in data set is %i." %len(words_stat.keys()))
     lowTF_words = set()
+    highTF_words = set()
     with open(os.path.join(data_dir, 'words_statistics.txt'), 'w') as f:
         f.write('TF\tDF\tWORD\n')
         for word, stat in sorted(words_stat.items(), key=lambda i: i[1], reverse=True):
             f.write('\t'.join([str(m) for m in stat[0:2]]) + '\t' + word +  '\n')
             if stat[0]<2: #need to define, may use the total length of abstract as a criteria
                 lowTF_words.add(word)
+            if stat[0]>5:
+                highTF_words.add(word)
     print("The number of low frequency words is %d." %len(lowTF_words))
+    print("The number of high frequency words is %d." %len(highTF_words))
+    for w in lowTF_words:
+        print w
     # print(stops)
 
 """
@@ -136,4 +142,4 @@ if __name__ == "__main__":
         fout.write('%s\n' %new_tweet)
     fout.close()
 """
-    print("Preprocessing is completed")
+print("Preprocessing is completed")

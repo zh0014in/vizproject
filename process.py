@@ -126,14 +126,14 @@ def processPaper(collection, paper):
 
                 getConfidenceAndValueAsList(paper, variant, 'title')
                 getConfidenceAndValueAsList(paper, variant, 'author',paper)
-                # getConfidenceAndValueAsList(paper, variant, 'abstract')
+                getConfidenceAndValueAsList(paper, variant, 'abstract')
                 getConfidenceAndValueAsList(paper, variant, 'address')
                 getConfidenceAndValueAsList(paper, variant, 'email')
                 getConfidenceAndValueAsList(paper, variant, 'affiliation')
                 # getConfidenceAndValueAsDict(ParsHed, variant, 'web')
                 # paper['ParsHed'] = ParsHed
                 if 'titles' in paper:
-                    for t in [a for a in paper['titles'] if a not in paperTitles]:
+                    for t in [a for a in paper['titles'] if a not in paperTitles and isinstance(a, basestring)]:
                         paperTitles.append(t)
             pass
 
@@ -152,8 +152,8 @@ def processPaper(collection, paper):
                     getCitationAsDict(c, citation, 'marker')
                     getCitationAsDict(c, citation, 'journal')
 
-                    if 'title' in c and c['title'] not in paperTitles:
-                        print c['title']
+                    if 'title' in c and c['title'] not in paperTitles and isinstance(c['title'], basestring):
+                        # print c['title']
                         paperTitles.append(c['title'])
 
                     paper['citations'].append(c)

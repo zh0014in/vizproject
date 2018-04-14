@@ -50,6 +50,7 @@ with open('years('+str(confidenceLimit)+').json', 'w') as outfile:
 
 
 citationsByYear = {}
+authorsByYear = {}
 
 for paper in [p for p in papers if 'citations' in p and len(p['citations']) > 0]:
     for citation in paper['citations']:
@@ -63,10 +64,24 @@ for paper in [p for p in papers if 'citations' in p and len(p['citations']) > 0]
                 else:
                     citationsByYear[citation['title']][paper['year']] = citationsByYear[citation['title']][paper['year']] + 1
 
+for paper in [p for p in papers if 'authors' in p and len(p['authors']) > 0]:
+    for author in paper['authors']:
+        if author not in authorsByYear:
+            authorsByYear[author] = {}
+            authorsByYear[author][paper['year']] = 1
+        else:
+            if paper['year'] not in authorsByYear[author]:
+                authorsByYear[author][paper['year']] = 1
+            else:
+                authorsByYear[author][paper['year']] = authorsByYear[author][paper['year']] + 1
+
 with open('citationByYear('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(citationsByYear, outfile)
+with open('authorsByYear('+str(confidenceLimit)+').json', 'w') as outfile:
+    json.dump(authorsByYear, outfile)
 
 citationByConference = {}
+authorByConference = {}
 
 for paper in [p for p in papers if 'citations' in p and len(p['citations']) > 0]:
     for citation in paper['citations']:
@@ -79,6 +94,18 @@ for paper in [p for p in papers if 'citations' in p and len(p['citations']) > 0]
                     citationByConference[citation['title']][paper['conference'][0:1]] = 1
                 else:
                     citationByConference[citation['title']][paper['conference'][0:1]] = citationByConference[citation['title']][paper['conference'][0:1]] + 1
+for paper in [p for p in papers if 'authors' in p and len(p['authors']) > 0]:
+    for author in paper['authors']:
+        if author not in authorByConference:
+            authorByConference[author] = {}
+            authorByConference[author][paper['conference'][0:1]] = 1
+        else:
+            if paper['conference'][0:1] not in authorByConference[author]:
+                authorByConference[author][paper['conference'][0:1]] = 1
+            else:
+                authorByConference[author][paper['conference'][0:1]] = authorByConference[author][paper['conference'][0:1]] + 1
 
 with open('citationByConference('+str(confidenceLimit)+').json', 'w') as outfile:
     json.dump(citationByConference, outfile)
+with open('authorByConference('+str(confidenceLimit)+').json', 'w') as outfile:
+    json.dump(authorByConference, outfile)

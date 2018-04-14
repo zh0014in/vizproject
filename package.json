@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/zh0014in/vizproject#readme",
   "dependencies": {
+    "angular": "^1.6.9",
     "c3": "^0.5.2",
     "echarts": "^4.0.4",
     "jquery": "^3.3.1",

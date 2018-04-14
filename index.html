@@ -1,7 +1,6 @@
 <html>
 
 <head>
-    <link href="node_modules/c3/c3.min.css" rel="stylesheet">
     <style>
         .bar {
             fill: steelblue;
@@ -17,160 +16,209 @@
     </style>
 </head>
 
-<body>
+<body ng-app="app" ng-controller="mainController as vm">
     <!-- <svg width="960" height="500"></svg> -->
     Top
-    <input id="top1" type="number" value="5"> citations for year
-    <input id="year1" type="number" value="2008">
+    <input id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
+    <input id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
     <div id="main1" style="width: 1200px;height:400px;"></div>
     Top
-    <input id="top2" type="number" value="5"> citations for conference
-    <select id="conference">
-        <option value="A" selected>A</option>
-        <option value="D">D</option>
-        <option value="E">E</option>
-        <option value="J">J</option>
-        <option value="K">K</option>
-        <option value="N">N</option>
-        <option value="P">P</option>
-        <option value="Q">Q</option>
-        <option value="S">S</option>
-        <option value="W">W</option>
-    </select>
+    <input id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
+    <select-conference data-ng-model="vm.selectedConference1"></select-conference>
     <div id="main2" style="width: 1200px;height:400px;"></div>
+
+    Top
+    <input type="number" value="5" data-ng-model="vm.top3" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');"> authors for year
+    <input type="number" value="2008" data-ng-model="vm.year2" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');">
+    <div id="main3" style="width: 1200px;height:400px;"></div>
+    Top
+    <input type="number" value="5" data-ng-model="vm.top4" data-ng-change="vm.beginDraw('main4', vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2), 'author name');"> authors for conference
+    <select-conference data-ng-model="vm.selectedConference2"></select-conference>
+    <div id="main4" style="width: 1200px;height:400px;"></div>
+
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="node_modules/d3/build/d3.min.js"></script>
-    <script src="node_modules/c3/c3.min.js"></script>
     <script src="node_modules/echarts/dist/echarts.min.js"></script>
     <script src="node_modules/linqjs/dist/linq.min.js"></script>
+    <script src="node_modules/angular/angular.min.js"></script>
     <script>
         (function () {
-            var citationByYear, citationByConference;
-            var year1 = 2008;
-            var selectedConference = 'A';
-            var top1 = 5, top2 = 5;
-            document.getElementById('top1').onchange = top1Changed;
-            document.getElementById('year1').onchange = year2Changed;
-            document.getElementById('top2').onchange = top2Changed;
-            document.getElementById('conference').onchange = conferenceChanged;
-            document.getElementById('')
-            function top1Changed() {
-                top1 = document.getElementById('top1').value;
-                prepareCitationByYear();
-                echartsDraw('main1', yearResult);
-            }
-            function year2Changed() {
-                year1 = document.getElementById('year1').value;
-                prepareCitationByYear();
-                echartsDraw('main1', yearResult);
-            }
-            function top2Changed() {
-                top2 = document.getElementById('top2').value;
-                prepareCitationByConference();
-                echartsDraw('main2', conferenceResult);
-            }
-            function conferenceChanged() {
-                selectedConference = document.getElementById('conference').value;
-                prepareCitationByConference();
-                echartsDraw('main2', conferenceResult);
-            }
-            jQuery.get('citationByYear(0.8).json', function (data) {
-                citationByYear = data;
-                prepareCitationByYear();
-                echartsDraw('main1', yearResult);
-            });
-            jQuery.get('citationByConference(0.8).json', function (data) {
-                citationByConference = data;
-                prepareCitationByConference();
-                echartsDraw('main2', conferenceResult);
-            });
+            angular
+                .module('app', [
 
-            var yearResult = []
-            function prepareCitationByYear() {
-                yearResult = []
-                for (var key in citationByYear) {
-                    if (!citationByYear.hasOwnProperty(key)) continue;
-                    var obj = citationByYear[key];
-                    for (var prop in obj) {
-                        if (!obj.hasOwnProperty(prop)) continue;
-                        if (parseInt(prop) == year1) {
-                            yearResult.push({
-                                paper: key,
-                                count: obj[prop]
-                            });
+                ])
+                .service('echartsDraw', [function () {
+                    this.draw = function (id, data, seriesName, type) {
+                        if(!type){
+                            type = 'bar';
                         }
+                        var myChart = echarts.init(document.getElementById(id));
+
+                        var option = {
+                            title: {
+                                text: ''
+                            },
+                            tooltip: {},
+                            legend: {
+                                data: []
+                            },
+                            xAxis: {
+                                type: 'value'
+                            },
+                            yAxis: {
+                                type: 'category',
+                                position: 'left',
+                                inverse: true,
+                                axisTick: {
+                                    inside: true
+                                },
+                                scale: true,
+                                data: data.select(function (x) { return x.paper; })
+                            },
+                            grid: {
+                                left: 550
+                            },
+                            series: [{
+                                name: seriesName,
+                                type: type,
+                                // itemStyle: { color: '#2f4554' },
+                                data: data.select(function (x) { return x.count; })
+                            }]
+                        };
+
+                        myChart.setOption(option);
                     }
-                }
-                yearResult.sort(compare);
-                yearResult = yearResult.slice(0, top1);
-                console.log(yearResult)
-            }
-            var conferenceResult = [];
-            function prepareCitationByConference() {
-                conferenceResult = [];
-                for (var key in citationByConference) {
-                    if (!citationByConference.hasOwnProperty(key)) continue;
-                    var obj = citationByConference[key];
-                    for (var prop in obj) {
-                        if (!obj.hasOwnProperty(prop)) continue;
-                        if (prop == selectedConference) {
-                            conferenceResult.push({
-                                paper: key,
-                                count: obj[prop]
+                }])
+                .controller('mainController', ['$http', 'echartsDraw', '$scope', function ($http, echartsDraw, $scope) {
+                    var vm = this;
+                    vm.citationByYear; vm.citationByConference;vm.authorsByYear;vm.authorsByConference;
+                    vm.year1 = 2009;
+                    vm.year2 = 2009;
+                    vm.selectedConference1 = 'A';
+                    vm.selectedConference2 = 'A';
+                    vm.top1 = 8; vm.top2 = 8; vm.top3 = 8; vm.top4 = 8;
+                    vm.yearResult = []
+                    vm.conferenceResult = [];
+                    jQuery.get('citationByYear(0.8).json', function (data) {
+                        vm.citationByYear = data;
+                        echartsDraw.draw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');
+
+                        jQuery.get('citationByConference(0.8).json', function (data) {
+                            vm.citationByConference = data;
+                            var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
+                            echartsDraw.draw('main2', data, 'paper title');
+
+                            jQuery.get('authorsByYear(0.8).json', function (data) {
+                                vm.authorsByYear = data;
+                                var data = vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2);
+                                echartsDraw.draw('main3', data, 'author name');
+
+                                jQuery.get('authorByConference(0.8).json', function (data) {
+                                    vm.authorsByConference = data;
+                                    var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
+                                    echartsDraw.draw('main4', data, 'author name');
+                                });
                             });
-                        }
+                        });
+                    });
+
+                    $scope.$watch(function () {
+                        return vm.selectedConference1;
+                    }, function (newValue) {
+                        var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
+                        vm.beginDraw('main2', data);
+                    })
+
+                    $scope.$watch(function () {
+                        return vm.selectedConference2;
+                    }, function (newValue) {
+                        var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
+                        vm.beginDraw('main4', data);
+                    })
+
+                    vm.beginDraw = function (main, data, seriesName) {
+                        echartsDraw.draw(main, data, seriesName);
                     }
-                }
-                conferenceResult.sort(compare);
-                conferenceResult = conferenceResult.slice(0, top2);
-            }
 
-            function echartsDraw(id, data) {
-                var myChart = echarts.init(document.getElementById(id));
+                    vm.prepareCitationByYear = function (data, top, year) {
+                        var result = []
+                        for (var key in data) {
+                            if (!data.hasOwnProperty(key)) continue;
+                            var obj = data[key];
+                            for (var prop in obj) {
+                                if (!obj.hasOwnProperty(prop)) continue;
+                                if (parseInt(prop) == year) {
+                                    result.push({
+                                        paper: key,
+                                        count: obj[prop]
+                                    });
+                                }
+                            }
+                        }
+                        result.sort(compare);
+                        result = result.slice(0, top);
+                        return result;
+                    }
 
-                var option = {
-                    title: {
-                        text: ''
-                    },
-                    tooltip: {},
-                    legend: {
-                        data: []
-                    },
-                    xAxis: {
-                        type: 'value'
-                    },
-                    yAxis: {
-                        type: 'category',
-                        position: 'left',
-                        inverse: true,
-                        axisTick: {
-                            inside: true
-                        },
-                        scale: true,
-                        data: data.select(function (x) { return x.paper; })
-                    },
-                    grid: {
-                        left: 550
-                    },
-                    series: [{
-                        name: 'paper title',
-                        type: 'bar',
-                        // itemStyle: { color: '#2f4554' },
-                        data: data.select(function (x) { return x.count; })
-                    }]
-                };
+                    vm.prepareCitationByConference = function (data, top, conference) {
+                        var result = [];
+                        for (var key in data) {
+                            if (!data.hasOwnProperty(key)) continue;
+                            var obj = data[key];
+                            for (var prop in obj) {
+                                if (!obj.hasOwnProperty(prop)) continue;
+                                if (prop == conference) {
+                                    result.push({
+                                        paper: key,
+                                        count: obj[prop]
+                                    });
+                                }
+                            }
+                        }
+                        result.sort(compare);
+                        result = result.slice(0, top);
+                        return result;
+                    }
 
-                myChart.setOption(option);
-            }
+                    function compare(a, b) {
+                        if (a.count < b.count)
+                            return 1;
+                        if (a.count > b.count)
+                            return -1;
+                        return 0;
+                    }
+                }])
+                ;
 
-            function compare(a, b) {
-                if (a.count < b.count)
-                    return 1;
-                if (a.count > b.count)
-                    return -1;
-                return 0;
-            }
+
+
         })();
+
+        (function () {
+            'use strict';
+
+            angular
+                .module('app')
+                .component('selectConference', selectConference());
+
+
+            function selectConference() {
+
+                function selectConferenceController() {
+                    var vm = this;
+
+                }
+
+                return {
+                    template: '<select id="conference" ng-model="vm.ngModel">        <option value="A">A</option>        <option value="D">D</option>        <option value="E">E</option>        <option value="J">J</option>        <option value="K">K</option>        <option value="N">N</option>        <option value="P">P</option>        <option value="Q">Q</option>        <option value="S">S</option>        <option value="W">W</option>    </select>',
+                    bindings: {
+                        ngModel: "=",
+                    },
+                    controller: selectConferenceController,
+                    controllerAs: 'vm'
+                }
+            }
+
+        }());
     </script>
 </body>
 

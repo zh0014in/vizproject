@@ -108,15 +108,16 @@ def processPaper(collection, paper):
         if algorithmName == "SectLabel":
             SectLabel = {}
             variant = algorithm.getElementsByTagName('variant')[0]
-            if getConfidence(variant) >= confidenceLimit:
-                SectLabel["no"] = getNo(variant)
+            # if getConfidence(variant) >= confidenceLimit:
+            SectLabel["no"] = getNo(variant)
 
-                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'title')
-                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'author')
-                getConfidenceAndValueAsList(SectLabel, variant, 'affiliation')
-                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'address')
-                # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'email')
-                paper['SectLabel'] = SectLabel
+            # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'title')
+            # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'author')
+            getConfidenceAndValueAsList(SectLabel, variant, 'affiliation')
+            getConfidenceAndValueAsList(SectLabel, variant, 'bodyText')
+            # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'address')
+            # getConfidenceAndValueAsList(SectLabel, variant, 'variant', 'email')
+            paper['SectLabel'] = SectLabel
         elif algorithmName == "ParsHed":
             # info about current paper
             ParsHed = {}

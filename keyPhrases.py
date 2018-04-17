@@ -12,6 +12,6 @@ r = Rake() # Uses stopwords for english from NLTK, and all puntuation characters
 
 r.extract_keywords_from_text("The paper describes a natural language based expert system route advisor for the public bus transport in Trondheim, Norway. The system is available on the Internet,and has been intstalled at the bus company's web server since the beginning of 1999. The system is bilingual, relying on an internal language independent logic representation.")
 
-print r.get_ranked_phrases() # To get keyword phrases ranked highest to lowest.
+print r.get_ranked_phrases_with_scores() # To get keyword phrases ranked highest to lowest.
 
 # print similar("Using Corpus-derived Name Lists for Named Entity Recognition", "Ralph Grishman, Pasi Tapanainen, Silja Huttunen 282 Using Corpus-Derived Name Lists for Named Entity Recognition")

@@ -22,6 +22,7 @@
     <input id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
     <input id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
     <div id="main1" style="width: 1200px;height:400px;"></div>
+    
     Top
     <input id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
     <select-conference data-ng-model="vm.selectedConference1"></select-conference>

@@ -14,6 +14,7 @@ import simplejson as json
 #import pickle
 import numpy as np
 from itertools import groupby
+from textblob import TextBlob
 
 def rm_html_tags(str):
     html_prog = re.compile(r'<[^>]+>', re.S)
@@ -68,7 +69,9 @@ def pre_process(str, porter):
 
     try:
         # return a list of str separate by word
-        str = nltk.tokenize.word_tokenize(str)
+        # str = nltk.tokenize.word_tokenize(str)
+        blob = TextBlob(str)
+        str = blob.noun_phrases
         try:
             # str = [porter.stem(t) for t in str]
             pass
@@ -113,7 +116,7 @@ if __name__ == "__main__":
         cnt = 0
 
         for i, paper in enumerate([p for p in list(v) if 'abstracts' in p]):
-            for content in paper['abstracts']:
+            for content in list(set().union(paper['abstracts'], paper['SectLabel']['bodyTexts'])):
                 postprocess_tweet = []
                 words = pre_process(content.replace("\n", " "), porter)  # stemming
                 for word in words:

@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .bar {
             fill: steelblue;
@@ -17,30 +18,39 @@
 </head>
 
 <body ng-app="app" ng-controller="mainController as vm">
-    <!-- <svg width="960" height="500"></svg> -->
-    Top
-    <input id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
-    <input id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
+    <form class="form-inline offset-md-3">
+        Top
+        <input class="form-control" id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
+        <input class="form-control" id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
+    </form>
     <div id="main1" style="width: 1200px;height:400px;"></div>
-    
-    Top
-    <input id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
-    <select-conference data-ng-model="vm.selectedConference1"></select-conference>
+
+    <form class="form-inline offset-md-3">
+        Top
+        <input class="form-control" id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
+        <select-conference data-ng-model="vm.selectedConference1"></select-conference>
+    </form>
     <div id="main2" style="width: 1200px;height:400px;"></div>
 
-    Top
-    <input type="number" value="5" data-ng-model="vm.top3" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');"> authors for year
-    <input type="number" value="2008" data-ng-model="vm.year2" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');">
+    <form class="form-inline offset-md-3">
+        Top
+        <input class="form-control" type="number" value="5" data-ng-model="vm.top3" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');"> authors for year
+        <input class="form-control" type="number" value="2008" data-ng-model="vm.year2" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');">
+    </form>
     <div id="main3" style="width: 1200px;height:400px;"></div>
-    Top
-    <input type="number" value="5" data-ng-model="vm.top4" data-ng-change="vm.beginDraw('main4', vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2), 'author name');"> authors for conference
-    <select-conference data-ng-model="vm.selectedConference2"></select-conference>
+
+    <form class="form-inline offset-md-3">
+        Top
+        <input class="form-control" type="number" value="5" data-ng-model="vm.top4" data-ng-change="vm.beginDraw('main4', vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2), 'author name');"> authors for conference
+        <select-conference data-ng-model="vm.selectedConference2"></select-conference>
+    </form>
     <div id="main4" style="width: 1200px;height:400px;"></div>
 
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/echarts/dist/echarts.min.js"></script>
     <script src="node_modules/linqjs/dist/linq.min.js"></script>
     <script src="node_modules/angular/angular.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     <script>
         (function () {
             angular
@@ -49,7 +59,7 @@
                 ])
                 .service('echartsDraw', [function () {
                     this.draw = function (id, data, seriesName, type) {
-                        if(!type){
+                        if (!type) {
                             type = 'bar';
                         }
                         var myChart = echarts.init(document.getElementById(id));
@@ -91,7 +101,7 @@
                 }])
                 .controller('mainController', ['$http', 'echartsDraw', '$scope', function ($http, echartsDraw, $scope) {
                     var vm = this;
-                    vm.citationByYear; vm.citationByConference;vm.authorsByYear;vm.authorsByConference;
+                    vm.citationByYear; vm.citationByConference; vm.authorsByYear; vm.authorsByConference;
                     vm.year1 = 2009;
                     vm.year2 = 2009;
                     vm.selectedConference1 = 'A';
@@ -210,7 +220,7 @@
                 }
 
                 return {
-                    template: '<select id="conference" ng-model="vm.ngModel">        <option value="A">A</option>        <option value="D">D</option>        <option value="E">E</option>        <option value="J">J</option>        <option value="K">K</option>        <option value="N">N</option>        <option value="P">P</option>        <option value="Q">Q</option>        <option value="S">S</option>        <option value="W">W</option>    </select>',
+                    template: '<select class="form-control" id="conference" ng-model="vm.ngModel">        <option value="A">A</option>        <option value="D">D</option>        <option value="E">E</option>        <option value="J">J</option>        <option value="K">K</option>        <option value="N">N</option>        <option value="P">P</option>        <option value="Q">Q</option>        <option value="S">S</option>        <option value="W">W</option>    </select>',
                     bindings: {
                         ngModel: "=",
                     },

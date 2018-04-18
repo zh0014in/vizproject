@@ -18,9 +18,11 @@
   "homepage": "https://github.com/zh0014in/vizproject#readme",
   "dependencies": {
     "angular": "^1.6.9",
+    "bootstrap": "^4.1.0",
     "c3": "^0.5.2",
     "echarts": "^4.0.4",
     "jquery": "^3.3.1",
-    "linqjs": "0.0.6"
+    "linqjs": "0.0.6",
+    "popper.js": "^1.14.3"
   }
 }

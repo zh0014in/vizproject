@@ -14,49 +14,153 @@
         .axis--x path {
             display: none;
         }
+
+        body {
+            padding-top: 60px;
+            padding-bottom: 20px;
+        }
+
+        .content-box {
+            width: 98%;
+            margin: 30px auto;
+        }
+
+        .mg-top-30 {
+            margin-top: 30px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 300px;
+        }
+
+        .g-group p {
+            line-height: 45px;
+            font-size: 14px;
+        }
+
+        .g-group span {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .g-group select {
+            height: 30px;
+            outline: none;
+            width: 120px;
+            font-size: 14px;
+        }
+
+        .g-group .text-input {
+            height: 25px;
+            outline: none;
+            width: 120px;
+            padding-left: 5px;
+        }
+
+        .g-group .btn-query {
+            margin-left: 15px;
+            height: 30px;
+            outline: none;
+            border: none;
+            background: #03a9f4;
+            width: 100px;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .g-group .chart {
+            border: 1px solid #eee;
+        }
+
+        #container {
+
+            height: 600px;
+            margin: 0.1em auto;
+        }
+
+        .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 2px;
+        }
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 115px;
+            height: 15px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
     </style>
 </head>
 
-<body ng-app="app" ng-controller="mainController as vm">
-    <form class="form-inline offset-md-3">
-        Top
-        <input class="form-control" id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
-        <input class="form-control" id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
-    </form>
-    <div id="main1" style="width: 1200px;height:400px;"></div>
+<body ng-app="app" ng-controller="mainController as vm" style="font-family:sans-serif">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
+        <a class="navbar-brand" href="#">CIV</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <form class="form-inline offset-md-3">
-        Top
-        <input class="form-control" id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
-        <select-conference data-ng-model="vm.selectedConference1"></select-conference>
-    </form>
-    <div id="main2" style="width: 1200px;height:400px;"></div>
-
-    <form class="form-inline offset-md-3">
-        Top
-        <input class="form-control" type="number" value="5" data-ng-model="vm.top3" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');"> authors for year
-        <input class="form-control" type="number" value="2008" data-ng-model="vm.year2" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');">
-    </form>
-    <div id="main3" style="width: 1200px;height:400px;"></div>
-
-    <form class="form-inline offset-md-3">
-        Top
-        <input class="form-control" type="number" value="5" data-ng-model="vm.top4" data-ng-change="vm.beginDraw('main4', vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2), 'author name');"> authors for conference
-        <select-conference data-ng-model="vm.selectedConference2"></select-conference>
-    </form>
-    <div id="main4" style="width: 1200px;height:400px;"></div>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="trend1" ui-sref-active="active">Trend 1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="trend2" ui-sref-active="active">Trend 2</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="trend3" ui-sref-active="active">Trend 3</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="topicModel1" ui-sref-active="active">Topic Model 1</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+                        Topic Model 2
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="nav-link" ui-sref="topicModel2" ui-sref-active="active">all</a>
+                        <a class="nav-link" ui-sref="topicModel2_rank" ui-sref-active="active">rank</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div ui-view></div>
 
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/echarts/dist/echarts.min.js"></script>
     <script src="node_modules/linqjs/dist/linq.min.js"></script>
     <script src="node_modules/angular/angular.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="node_modules/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+    <script src="d3.v4.min.js"></script>
     <script>
         (function () {
             angular
                 .module('app', [
-
+                    'ui.router'
                 ])
+
                 .service('echartsDraw', [function () {
                     this.draw = function (id, data, seriesName, type) {
                         if (!type) {
@@ -100,103 +204,7 @@
                     }
                 }])
                 .controller('mainController', ['$http', 'echartsDraw', '$scope', function ($http, echartsDraw, $scope) {
-                    var vm = this;
-                    vm.citationByYear; vm.citationByConference; vm.authorsByYear; vm.authorsByConference;
-                    vm.year1 = 2009;
-                    vm.year2 = 2009;
-                    vm.selectedConference1 = 'A';
-                    vm.selectedConference2 = 'A';
-                    vm.top1 = 8; vm.top2 = 8; vm.top3 = 8; vm.top4 = 8;
-                    vm.yearResult = []
-                    vm.conferenceResult = [];
-                    jQuery.get('citationByYear(0.8).json', function (data) {
-                        vm.citationByYear = data;
-                        echartsDraw.draw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');
 
-                        jQuery.get('citationByConference(0.8).json', function (data) {
-                            vm.citationByConference = data;
-                            var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
-                            echartsDraw.draw('main2', data, 'paper title');
-
-                            jQuery.get('authorsByYear(0.8).json', function (data) {
-                                vm.authorsByYear = data;
-                                var data = vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2);
-                                echartsDraw.draw('main3', data, 'author name');
-
-                                jQuery.get('authorByConference(0.8).json', function (data) {
-                                    vm.authorsByConference = data;
-                                    var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
-                                    echartsDraw.draw('main4', data, 'author name');
-                                });
-                            });
-                        });
-                    });
-
-                    $scope.$watch(function () {
-                        return vm.selectedConference1;
-                    }, function (newValue) {
-                        var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
-                        vm.beginDraw('main2', data);
-                    })
-
-                    $scope.$watch(function () {
-                        return vm.selectedConference2;
-                    }, function (newValue) {
-                        var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
-                        vm.beginDraw('main4', data);
-                    })
-
-                    vm.beginDraw = function (main, data, seriesName) {
-                        echartsDraw.draw(main, data, seriesName);
-                    }
-
-                    vm.prepareCitationByYear = function (data, top, year) {
-                        var result = []
-                        for (var key in data) {
-                            if (!data.hasOwnProperty(key)) continue;
-                            var obj = data[key];
-                            for (var prop in obj) {
-                                if (!obj.hasOwnProperty(prop)) continue;
-                                if (parseInt(prop) == year) {
-                                    result.push({
-                                        paper: key,
-                                        count: obj[prop]
-                                    });
-                                }
-                            }
-                        }
-                        result.sort(compare);
-                        result = result.slice(0, top);
-                        return result;
-                    }
-
-                    vm.prepareCitationByConference = function (data, top, conference) {
-                        var result = [];
-                        for (var key in data) {
-                            if (!data.hasOwnProperty(key)) continue;
-                            var obj = data[key];
-                            for (var prop in obj) {
-                                if (!obj.hasOwnProperty(prop)) continue;
-                                if (prop == conference) {
-                                    result.push({
-                                        paper: key,
-                                        count: obj[prop]
-                                    });
-                                }
-                            }
-                        }
-                        result.sort(compare);
-                        result = result.slice(0, top);
-                        return result;
-                    }
-
-                    function compare(a, b) {
-                        if (a.count < b.count)
-                            return 1;
-                        if (a.count > b.count)
-                            return -1;
-                        return 0;
-                    }
                 }])
                 ;
 
@@ -230,6 +238,70 @@
             }
 
         }());
+    </script>
+    <script src="controllers/trend1Controller.js"></script>
+    <script src="controllers/trend2Controller.js"></script>
+    <script src="controllers/trend3Controller.js"></script>
+    <script src="controllers/topicModel1Controller.js"></script>
+    <script src="controllers/topicModel2Controller.js"></script>
+    <script src="controllers/topicModel2_rankController.js"></script>
+    <script>
+        (function () {
+            angular
+                .module('app')
+                .config(function ($stateProvider, $urlRouterProvider) {
+                    var trend1State = {
+                        name: 'trend1',
+                        url: '/trend1',
+                        templateUrl: "trend1/trend1.html",
+                        controller: 'trend1Controller',
+                        controllerAs: "vm"
+                    }
+
+                    var trend2State = {
+                        name: 'trend2',
+                        url: '/trend2',
+                        templateUrl: "trend2/trend2.html",
+                        controller: "trend2Controller",
+                        controllerAs: 'vm'
+                    }
+                    var trend3State = {
+                        name: 'trend3',
+                        url: '/trend3',
+                        templateUrl: "trend3/trend3.html",
+                        controller: "trend3Controller",
+                        controllerAs: 'vm'
+                    }
+                    var topicModel1State = {
+                        name: 'topicModel1',
+                        url: '/topicModel1',
+                        templateUrl: "topicModel1/topicModel1.html",
+                        controller: "topicModel1Controller",
+                        controllerAs: 'vm'
+                    }
+                    var topicModel2State = {
+                        name: 'topicModel2',
+                        url: '/topicModel2',
+                        templateUrl: "topicModel2/topicModel2.html",
+                        controller: "topicModel2Controller",
+                        controllerAs: 'vm'
+                    }
+                    var topicModel2RankState = {
+                        name: 'topicModel2_rank',
+                        url: '/topicModel2_rank',
+                        templateUrl: "topicModel2_rank/topicModel2_rank.html",
+                        controller: "topicModel2_rankController",
+                        controllerAs: 'vm'
+                    }
+                    $stateProvider.state(trend1State);
+                    $stateProvider.state(trend2State);
+                    $stateProvider.state(trend3State);
+                    $stateProvider.state(topicModel1State);
+                    $stateProvider.state(topicModel2State);
+                    $stateProvider.state(topicModel2RankState);
+                    $urlRouterProvider.otherwise('/trend1State');
+                })
+        })();
     </script>
 </body>
 

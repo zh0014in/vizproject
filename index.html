@@ -144,15 +144,6 @@
     <script src="node_modules/angular/angular.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="node_modules/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
-    <script type="text/javascript" src="https://echarts.baidu.com/gallery/vendors/simplex.js"></script>
     <script src="d3.v4.min.js"></script>
     <script>
         (function () {
@@ -162,43 +153,61 @@
                 ])
 
                 .service('echartsDraw', [function () {
-                    this.draw = function (id, data, seriesName, type) {
+                    var option = {
+                        title: {
+                            text: ''
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: []
+                        },
+                        xAxis: {
+                            type: 'value',
+                            minInterval: 1,
+                            axisLabel:{
+                                textBorderWidth: 200
+                            }
+                        },
+                        yAxis: {
+                            type: 'category',
+                            position: 'left',
+                            inverse: true,
+                            
+                            axisTick: {
+                                inside: true
+                            },
+                            scale: true,
+                            data: []
+                        },
+                        grid: {
+                            left: 550
+                        },
+                        series: [{
+                            name: '',
+                            type: '',
+                            // itemStyle: { color: '#2f4554' },
+                            data: []
+                        }]
+                    };
+
+                    this.draw = function (id, data, seriesName, title, type) {
                         if (!type) {
                             type = 'bar';
                         }
                         var myChart = echarts.init(document.getElementById(id));
 
-                        var option = {
-                            title: {
-                                text: ''
-                            },
-                            tooltip: {},
-                            legend: {
-                                data: []
-                            },
-                            xAxis: {
-                                type: 'value'
-                            },
-                            yAxis: {
-                                type: 'category',
-                                position: 'left',
-                                inverse: true,
-                                axisTick: {
-                                    inside: true
-                                },
-                                scale: true,
-                                data: data.select(function (x) { return x.paper; })
-                            },
-                            grid: {
-                                left: 550
-                            },
-                            series: [{
-                                name: seriesName,
-                                type: type,
-                                // itemStyle: { color: '#2f4554' },
-                                data: data.select(function (x) { return x.count; })
-                            }]
-                        };
+                        if (title) {
+                            // option.title.text = title;
+                            option.xAxis.name = title;
+                        }
+                        if (seriesName) {
+                            option.series[0].name = seriesName;
+                        }
+                        if (type) {
+                            option.series[0].type = type;
+                        }
+                        option.yAxis.data = data.select(function (x) { return x.paper; })
+                        option.series[0].data = data.select(function (x) { return x.count; })
 
                         myChart.setOption(option);
                     }

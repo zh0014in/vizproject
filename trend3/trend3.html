@@ -3,26 +3,26 @@
     <input class="form-control" type="number" value="5" data-ng-model="vm.top3" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');"> authors for year
     <input class="form-control" type="number" value="2008" data-ng-model="vm.year2" data-ng-change="vm.beginDraw('main3', vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2), 'author name');">
 </form>
-<div id="main3" style="width: 1200px;height:400px;"></div>
+<div id="main3" style="width: 100%;height:400px;"></div>
 
 <form class="form-inline offset-md-3">
     Top
     <input class="form-control" type="number" value="5" data-ng-model="vm.top4" data-ng-change="vm.beginDraw('main4', vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2), 'author name');"> authors for conference
     <select-conference data-ng-model="vm.selectedConference2"></select-conference>
 </form>
-<div id="main4" style="width: 1200px;height:400px;"></div>
+<div id="main4" style="width: 100%;height:400px;"></div>
 
 <form class="form-inline offset-md-3">
     Top
     <input class="form-control" id="top1" type="number" value="5" data-ng-model="vm.top1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');"> citations for year
     <input class="form-control" id="year1" type="number" value="2008" data-ng-model="vm.year1" data-ng-change="vm.beginDraw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title');">
 </form>
-<div id="main1" style="width: 1200px;height:400px;"></div>
+<div id="main1" style="width: 100%;height:400px;"></div>
 
 <form class="form-inline offset-md-3">
     Top
     <input class="form-control" id="top2" type="number" value="5" data-ng-model="vm.top2" data-ng-change="vm.beginDraw('main2', vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1), 'paper title');"> citations for conference
     <select-conference data-ng-model="vm.selectedConference1"></select-conference>
 </form>
-<div id="main2" style="width: 1200px;height:400px;"></div>
+<div id="main2" style="width: 100%;height:400px;"></div>
 

@@ -20,21 +20,21 @@
         jQuery.get('authorsByYear(0.8).json', function (data) {
             vm.authorsByYear = data;
             var data = vm.prepareCitationByYear(vm.authorsByYear, vm.top3, vm.year2);
-            echartsDraw.draw('main3', data, 'author name', 'Top authors by year');
+            echartsDraw.draw('main3', data, 'author name', 'Top authors of year');
 
             jQuery.get('authorByConference(0.8).json', function (data) {
                 vm.authorsByConference = data;
                 var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
-                echartsDraw.draw('main4', data, 'author name', 'Top authors by conference');
+                echartsDraw.draw('main4', data, 'author name', 'Top authors of conference');
 
                 jQuery.get('citationByYear(0.8).json', function (data) {
                     vm.citationByYear = data;
-                    echartsDraw.draw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title', 'Top citations by year');
+                    echartsDraw.draw('main1', vm.prepareCitationByYear(vm.citationByYear, vm.top1, vm.year1), 'paper title', 'Top citations of year');
 
                     jQuery.get('citationByConference(0.8).json', function (data) {
                         vm.citationByConference = data;
                         var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
-                        echartsDraw.draw('main2', data, 'paper title', 'Top citations by conference');
+                        echartsDraw.draw('main2', data, 'paper title', 'Top citations of conference');
 
 
                     });

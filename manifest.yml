@@ -2,9 +2,3 @@
 applications:
 - name: vizproject
   memory: 512M
-  instances: 1
-  path: .
-  host: vizproject
-  framework: node
-  command:    http-server
-  buildpack:  sdk-for-nodejs

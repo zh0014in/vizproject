@@ -1,4 +1,4 @@
 ---
 applications:
 - name: vizproject
-  memory: 512M
+  memory: 1024M

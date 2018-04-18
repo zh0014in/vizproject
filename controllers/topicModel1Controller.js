@@ -9,7 +9,6 @@
 
     function topicModel1Controller() {
 
-
         var data = {
             "Network": {
                 "Node": [
@@ -413,6 +412,7 @@
                         drawLine(svg_target, subtopics[word], x, y, meta["base_colors"][j], true);
                     }
                 }
+                drawAxis(svg_target, x, y);
                 addLegend(topic, words, meta["base_colors"], "legend" + (+i + 1));
             }
             for (var k = 0; k < topic_words.length; k++) {
@@ -487,9 +487,10 @@
             }
 
             // Add the X Axis
-            svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x).ticks(data.length).tickFormat(d3.format(".0f")));
+            // svg.append("g")
+            //     .attr("transform", "translate(0," + height + ")")
+            //     .call(d3.axisBottom(x).ticks(data.length).tickFormat(d3.format(".0f")));
+
             // svg.append("text")
             //     .attr("transform", "translate(" + (width/2) + "," + (height + margin.top+20) + ")")
             //     .style("text-anchor", "middle")
@@ -497,8 +498,9 @@
             //     .attr("font-weight", "bold");
 
             // Add the Y Axis
-            svg.append("g")
-                .call(d3.axisLeft(y));
+            // svg.append("g")
+            //     .call(d3.axisLeft(y));
+
             // svg.append("text")
             //     .attr("transform", "rotate(-90)")
             //     .attr("y", 0 - margin.left)
@@ -508,6 +510,15 @@
             //     .style("text-anchor", "middle")
             //     .text("No. of Publications");
         }
+
+        function drawAxis(svg, x, y) {
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x).ticks(data.length).tickFormat(d3.format(".0f")));
+            svg.append("g")
+                .call(d3.axisLeft(y));
+        }
+
 
         $("#yes").click(function () {
             $("#yes").css({ "font-weight": "bold", "cursor": "default" });
@@ -540,20 +551,6 @@
         });
 
         function add_word_choice_event() {
-            // $(".word_choice").click(function() {
-            // console.log(this.id);
-            //
-            // active_topic_words = [];
-            // for (var i=0; i<topic_words.length; i++) {
-            //     var word = topic_words[i];
-            //     var tag = "word_" + word;
-            //     var checkbox = document.getElementById(tag);
-            //     if (checkbox && checkbox.checked === true) {
-            //         active_topic_words.push(word);
-            //     }
-            // }
-            // });
-
             $(".word_choice").click(function () {
                 var checkbox = document.getElementById(this.id);
                 var word = this.id.replace("word_", "");

@@ -123,6 +123,13 @@ var Chart = {
             title: {
                 text: 'Number of authors in each conference'
             },
+			legend: {
+             align: 'right',
+             verticalAlign: 'top',
+             layout: 'vertical',
+               x: 0,
+               y: 50
+                  },
             xAxis: {
                 type: 'value',
                 title: {
@@ -211,6 +218,11 @@ var Chart = {
             title: {
                 text: 'Number of paper by each author in each conference in a year'
             },
+			legend: {
+      enabled: false,
+    
+    },
+		     
             xAxis: {
                 type: 'value',
                 title: {

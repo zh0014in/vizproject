@@ -19,9 +19,12 @@
   "dependencies": {
     "@uirouter/angularjs": "^1.0.15",
     "angular": "^1.6.9",
+    "body-parser": "^1.18.2",
     "bootstrap": "^4.1.0",
     "c3": "^0.5.2",
+    "cfenv": "^1.0.4",
     "echarts": "^4.0.4",
+    "express": "^4.16.3",
     "jquery": "^3.3.1",
     "linqjs": "0.0.6",
     "popper.js": "^1.14.3"

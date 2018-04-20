@@ -48,18 +48,18 @@
             return vm.selectedConference1;
         }, function (newValue) {
             var data = vm.prepareCitationByConference(vm.citationByConference, vm.top2, vm.selectedConference1);
-            vm.beginDraw('main2', data, 'paper title');
+            vm.beginDraw('main2', data, 'paper title', 'Top citations of conference');
         })
 
         $scope.$watch(function () {
             return vm.selectedConference2;
         }, function (newValue) {
             var data = vm.prepareCitationByConference(vm.authorsByConference, vm.top4, vm.selectedConference2);
-            vm.beginDraw('main4', data, 'author name');
+            vm.beginDraw('main4', data, 'author name', 'Top authors of conference');
         })
 
-        vm.beginDraw = function (main, data, seriesName) {
-            echartsDraw.draw(main, data, seriesName);
+        vm.beginDraw = function (main, data, seriesName, title) {
+            echartsDraw.draw(main, data, seriesName, title);
         }
 
         vm.prepareCitationByYear = function (data, top, year) {
